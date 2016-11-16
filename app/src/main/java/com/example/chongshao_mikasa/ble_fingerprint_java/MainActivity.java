@@ -2,6 +2,10 @@ package com.example.chongshao_mikasa.ble_fingerprint_java;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class MainActivity extends ARActivity {
+public class MainActivity extends ARActivity implements SensorEventListener {
 
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 133;
 
@@ -55,6 +59,19 @@ public class MainActivity extends ARActivity {
     private SimpleRenderer simpleRenderer = new SimpleRenderer();
     Map<String, Integer> beaconAngle = new HashMap<String, Integer>();
     Map<String, String> beaconUUID = new HashMap<>();
+
+    // IMU related variables
+    private final float[] mRotationMatrix = new float[16];
+    private volatile float[] mAccelerometerMatrix = new float[4];
+
+    private float rotationX = 0;
+    private float rotationY = 0;
+    private float rotationZ = 0;
+    private float accelX = 0;
+    private float accelY = 0;
+    private float accelZ = 0;
+
+    private TextView rotationMsg;
 
     public String getClosestUUID() {
         return closestUUID;
@@ -128,102 +145,48 @@ public class MainActivity extends ARActivity {
             @Override
             public void onBeaconsDiscovered(Region region, List<Beacon> list) {
                 if (!list.isEmpty()) {
-                    int largeRssi = -100;
-                    String largeUUID = "none";
-
-                 //   Beacon nearestBeacon = list.get(0);
-
-                 //   closestUUID = nearestBeacon.getProximityUUID().toString();
-               //     updateARObjDirection(closestUUID, simpleRenderer);
-               //     Log.d("T", "closest UUID:" + closestUUID);
-
                     for (Beacon beacon : list) {
                         if (beacon.getProximityUUID().equals(UUID.fromString("a75fa152-a904-4502-8ea8-192f8fcfee6a"))) { // 1
                             Log.d("Airport", "Beacon 0 dist: " + String.valueOf(beacon.getRssi()));
                             beacon0.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("0", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "a75fa152-a904-4502-8ea8-192f8fcfee6a";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("9795a656-a244-47f5-b8ab-a24cf9728976"))) { // 15
                             Log.d("Airport", "Beacon 1 dist: " + String.valueOf(beacon.getRssi()));
                             beacon1.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("1", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "9795a656-a244-47f5-b8ab-a24cf9728976";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("58deb431-0387-4aff-b04d-bf773f2409cc"))) { // 2
                             Log.d("Airport", "Beacon 2 dist: " + String.valueOf(beacon.getRssi()));
                             beacon2.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("2", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "58deb431-0387-4aff-b04d-bf773f2409cc";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("e14f37ee-cd9c-41a1-b145-134570f9a8e8"))) { // 3
                             Log.d("Airport", "Beacon 3 dist: " + String.valueOf(beacon.getRssi()));
                             beacon3.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("3", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "e14f37ee-cd9c-41a1-b145-134570f9a8e8";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("b6fc3980-846c-4f48-bfc5-2b2e0ca2d702"))) { // 4
                             Log.d("Airport", "Beacon 4 dist: " + String.valueOf(beacon.getRssi()));
                             beacon4.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("4", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "b6fc3980-846c-4f48-bfc5-2b2e0ca2d702";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("9aa9bca6-b207-41f5-a076-d294c9b374db"))) { // 5
                             Log.d("Airport", "Beacon 5 dist: " + String.valueOf(beacon.getRssi()));
                             beacon5.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("5", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "9aa9bca6-b207-41f5-a076-d294c9b374db";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("21f158a6-a083-4020-9b40-8cd34380ffc3"))) { // 6
                             Log.d("Airport", "Beacon 6 dist: " + String.valueOf(beacon.getRssi()));
                             beacon6.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("6", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "21f158a6-a083-4020-9b40-8cd34380ffc3";
-//                            }
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("7691f1bd-284f-439d-8b1a-d223f0249b9b"))) { // 7
                             Log.d("Airport", "Beacon 7 dist: " + String.valueOf(beacon.getRssi()));
                             beacon7.setText("distance: "+ String.valueOf(beacon.getRssi()));
                             beaconDistance.put("7", beacon.getRssi());
-//                            if (beacon.getRssi() > largeRssi) {
-//                                largeRssi = beacon.getRssi();
-//                                largeUUID = "7691f1bd-284f-439d-8b1a-d223f0249b9b";
-//                            }
                         }
                     }
- //                   closestUUID = largeUUID;
- //                   simpleRenderer.setUUID(largeUUID);
-
-//                    double distance = computeDistance(nearestBeacon);
-//                    beacon0.setText("distance: "+ String.valueOf(nearestBeacon.getRssi()));
-//                    beacon1.setText("distance: "+ String.valueOf(distance));
-//                    beacon2.setText("distance: "+ String.valueOf(distance));
-//                    beacon3.setText("distance: "+ String.valueOf(distance));
-//                    beacon4.setText("distance: "+ String.valueOf(distance));
-//                    beacon5.setText("distance: "+ String.valueOf(distance));
-//                    beacon6.setText("distance: "+ String.valueOf(distance));
-//                    beacon7.setText("distance: "+ String.valueOf(distance));
-                    //       List<String> places = placesNearBeacon(nearestBeacon);
                 }
                 updateARObjDirection();
             }
@@ -244,6 +207,9 @@ public class MainActivity extends ARActivity {
                 vib.vibrate(40);
             }
         });
+
+        //IMU related stuff
+        rotationMsg = (TextView)this.findViewById(R.id.rotationMsg);
     }
 
     private void updateARObjDirection() {
@@ -329,7 +295,6 @@ public class MainActivity extends ARActivity {
         return Math.pow(10d, ((double) txPower - rssi) / (10 * 2));
     }
 
-
     @Override
     protected ARRenderer supplyRenderer() {
         if (!checkCameraPermission()) {
@@ -341,7 +306,6 @@ public class MainActivity extends ARActivity {
 
     @Override
     protected FrameLayout supplyFrameLayout() {
-        //   return (FrameLayout)this.findViewById(R.id.mainLayout);
         return this.mainLayout;
     }
 
@@ -360,5 +324,39 @@ public class MainActivity extends ARActivity {
                 return;
             }
         }
+    }
+
+    // IMU related methods
+    public void onSensorChanged(SensorEvent event) {
+        // we received a sensor event. it is a good practice to check
+        // that we received the proper event
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mAccelerometerMatrix[0] = event.values[0];
+            mAccelerometerMatrix[1] = event.values[1];
+            mAccelerometerMatrix[2] = event.values[2];
+            mAccelerometerMatrix[3] = 0;
+
+            accelX = event.values[0];
+            accelY = event.values[1];
+            accelZ = event.values[2];
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+            // convert the rotation-vector to a 4x4 matrix. the matrix
+            // is interpreted by Open GL as the inverse of the
+            // rotation-vector, which is what we want.
+
+            SensorManager.getRotationMatrixFromVector(
+                    mRotationMatrix, event.values);
+            rotationX = event.values[0];
+            rotationY = event.values[1];
+            rotationZ = event.values[2];
+
+            rotationMsg.setText("rotation x: " + String.valueOf(rotationX) + " y: " +
+                    String.valueOf(rotationY) + " z: " + String.valueOf(rotationZ));
+        }
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 }

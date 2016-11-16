@@ -1,5 +1,9 @@
 package com.example.chongshao_mikasa.ble_fingerprint_java;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -16,7 +20,7 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by chongshao-mikasa on 11/13/16.
  */
 
-public class SimpleRenderer extends ARRenderer {
+public class SimpleRenderer extends ARRenderer  {
     private int markerID = -1;
 
     private Arrow cube = new Arrow(40.0f, 0.0f, 0.0f, 20.0f);
@@ -107,4 +111,6 @@ public class SimpleRenderer extends ARRenderer {
         if (spinning) angle += 5.0f;
         //   }
     }
+
+
 }
