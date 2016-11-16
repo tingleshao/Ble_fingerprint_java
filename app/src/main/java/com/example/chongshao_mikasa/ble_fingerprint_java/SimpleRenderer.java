@@ -1,9 +1,5 @@
 package com.example.chongshao_mikasa.ble_fingerprint_java;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.opengl.Matrix;
 import android.util.Log;
 

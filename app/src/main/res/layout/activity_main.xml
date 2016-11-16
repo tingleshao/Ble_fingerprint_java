@@ -21,9 +21,8 @@
     <TextView
         android:text="TextView"
         android:layout_width="150dp"
-        android:layout_below="@+id/beacon0"
-        android:layout_alignEnd="@+id/beacon0"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="21dp"
+        android:layout_marginLeft="450dp"
         android:id="@+id/beacon1"
         android:layout_height="20dp" />
 
@@ -59,7 +58,7 @@
         android:layout_width="150dp"
         android:layout_height="20dp"
         android:layout_below="@+id/beacon4"
-        android:layout_alignEnd="@+id/beacon4"
+        android:layout_alignStart="@+id/beacon4"
         android:layout_marginTop="1dp"
         android:id="@+id/beacon5" />
 
@@ -99,7 +98,7 @@
     <TextView
         android:text="TextView"
         android:layout_width="150dp"
-        android:layout_height="20dp"
+        android:layout_height="60dp"
         android:layout_below="@+id/gl_layout"
         android:layout_alignStart="@+id/beacon7"
         android:layout_marginTop="13dp"

@@ -61,6 +61,9 @@ public class MainActivity extends ARActivity implements SensorEventListener {
     Map<String, String> beaconUUID = new HashMap<>();
 
     // IMU related variables
+    private SensorManager mSensorManager;
+    private Sensor mRotationVectorSensor, mAccelerationSensor;
+
     private final float[] mRotationMatrix = new float[16];
     private volatile float[] mAccelerometerMatrix = new float[4];
 
@@ -209,6 +212,14 @@ public class MainActivity extends ARActivity implements SensorEventListener {
         });
 
         //IMU related stuff
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mRotationVectorSensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ROTATION_VECTOR);
+        mAccelerationSensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER);
+
+        mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
+        mSensorManager.registerListener(this, mAccelerationSensor, 5000);
         rotationMsg = (TextView)this.findViewById(R.id.rotationMsg);
     }
 
@@ -328,6 +339,7 @@ public class MainActivity extends ARActivity implements SensorEventListener {
 
     // IMU related methods
     public void onSensorChanged(SensorEvent event) {
+        Log.d("T", "sensor changed!");
         // we received a sensor event. it is a good practice to check
         // that we received the proper event
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -352,8 +364,8 @@ public class MainActivity extends ARActivity implements SensorEventListener {
             rotationY = event.values[1];
             rotationZ = event.values[2];
 
-            rotationMsg.setText("rotation x: " + String.valueOf(rotationX) + " y: " +
-                    String.valueOf(rotationY) + " z: " + String.valueOf(rotationZ));
+            rotationMsg.setText("rotation x: " + String.valueOf(rotationX) + "\n y: " +
+                    String.valueOf(rotationY) + "\n z: " + String.valueOf(rotationZ));
         }
     }
 
