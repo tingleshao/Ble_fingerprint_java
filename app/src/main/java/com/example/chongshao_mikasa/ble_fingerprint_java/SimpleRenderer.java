@@ -29,6 +29,7 @@ public class SimpleRenderer extends ARRenderer  {
     Map<String, Integer> beaconAngle = new HashMap<String, Integer>();
     MainActivity activity;
 
+
     public void setActivity(MainActivity activity) {
         this.activity = activity;
     }
@@ -94,7 +95,7 @@ public class SimpleRenderer extends ARRenderer  {
         else {
             xangle = (float)beaconAngle.get(activity.getClosestUUID());
         }
-        Log.d("T", "Xangle:" +  String.valueOf(xangle));
+//        Log.d("T", "Xangle:" +  String.valueOf(xangle));
 
         Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
         gl.glLoadMatrixf(m, 0);
@@ -107,6 +108,4 @@ public class SimpleRenderer extends ARRenderer  {
         if (spinning) angle += 5.0f;
         //   }
     }
-
-
 }

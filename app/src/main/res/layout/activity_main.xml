@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -83,25 +84,40 @@
     <com.example.chongshao_mikasa.ble_fingerprint_java.MySurfaceView
         android:id="@+id/gl_layout"
         android:orientation="horizontal"
-        android:layout_height="175dp"
-        android:layout_width="175dp"
         android:layout_marginLeft="250dp"
-        />
+        android:layout_width="125dp"
+        android:layout_height="125dp" />
+
+
+    <com.example.chongshao_mikasa.ble_fingerprint_java.MySurfaceView2
+        android:id="@+id/gl_layout2"
+        android:orientation="horizontal"
+        android:layout_marginLeft="250dp"
+        android:layout_marginTop="125dp"
+        android:layout_width="125dp"
+        android:layout_height="125dp" />
 
     <FrameLayout
         android:id="@+id/mainLayout"
         android:orientation="vertical"
         android:layout_width="250dp"
-        android:layout_height="250dp"
-        />
+        android:layout_height="250dp" />
 
     <TextView
         android:text="TextView"
         android:layout_width="150dp"
         android:layout_height="60dp"
         android:layout_below="@+id/gl_layout"
-        android:layout_alignStart="@+id/beacon7"
-        android:layout_marginTop="13dp"
+        android:layout_alignEnd="@+id/beacon7"
+        android:layout_marginTop="40dp"
         android:id="@+id/rotationMsg" />
+
+    <Button
+        android:text="Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/gl_layout"
+        android:id="@+id/button" />
 
 </RelativeLayout>

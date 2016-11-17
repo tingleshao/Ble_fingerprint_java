@@ -2,18 +2,26 @@ package com.example.chongshao_mikasa.ble_fingerprint_java;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +31,7 @@ import com.estimote.sdk.Region;
 import com.estimote.sdk.SystemRequirementsChecker;
 
 import org.artoolkit.ar.base.ARActivity;
+import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 
 import java.util.HashMap;
@@ -30,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class MainActivity extends ARActivity implements SensorEventListener {
+public class MainActivity extends ARActivity implements SensorEventListener  {
 
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 133;
 
@@ -79,6 +88,11 @@ public class MainActivity extends ARActivity implements SensorEventListener {
     public String getClosestUUID() {
         return closestUUID;
     }
+
+    CaptureCameraPreview cam;
+    Button button;
+    ImageView image;
+    byte[] myframe;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -221,6 +235,58 @@ public class MainActivity extends ARActivity implements SensorEventListener {
         mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
         mSensorManager.registerListener(this, mAccelerationSensor, 5000);
         rotationMsg = (TextView)this.findViewById(R.id.rotationMsg);
+
+        //camera stuff
+        cam = this.getCameraPreview();
+     //   cam.getDrawingCache();
+
+        button = (Button)this.findViewById(R.id.button);
+     //   image = (ImageView)this.findViewById(R.id.imageView);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cam = MainActivity.this.getCameraPreview();
+                if (cam != null) {
+               //     cam.getDrawingCache();
+                    MySurfaceView2 view2 = (MySurfaceView2)MainActivity.this.findViewById(R.id.gl_layout2);
+                 //   view2.setBitmap(cam.getDrawingCache());
+                    mainLayout.setDrawingCacheEnabled(true);
+                    mainLayout.buildDrawingCache();
+              //      mainLayout.get
+                    Bitmap bm = mainLayout.getDrawingCache();
+
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(MainActivity.this.myframe, 0, MainActivity.this.myframe.length);
+
+                    //          image.setMinimumHeight(40);
+           //         image.setMinimumWidth(40);
+             //       ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(image.getLayoutParams());
+             //       marginParams.setMargins(0, 0, 0, 0);
+              //      RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+               //     image.setLayoutParams(layoutParams);
+              //      Log.d("T", "imageview visible" + String.valueOf(image.getVisibility()==View.VISIBLE) +String.valueOf(image.getWidth())+String.valueOf(image.getHeight()));
+                    if (bitmap!=null) {
+                //        image.setImageBitmap(bm);
+                        view2.setBitmap(bitmap);
+                        Log.d("T", "bm not null" + String.valueOf(MainActivity.this.myframe.length));
+
+                    }
+                    else {
+                        Log.d("T", "bm null!"+ String.valueOf(MainActivity.this.myframe.length));
+                    }
+                    Log.d("T", "cam not null");
+                }
+                else {
+                    Log.d("T", "cam null");
+                }
+//                debug.setText("right save button clicked!");
+//                saveRightSensorData();
+//                Bitmap saveBitMap = matToBitMap(rightImage, rightImage.width());
+//                storeImage(saveBitMap);
+//
+//                MediaStore.Images.Media.insertImage(getContentResolver(),
+//                        saveBitMap, "foo2", "bar2"); //TODO: change this file name later
+            }
+        });
     }
 
     private void updateARObjDirection() {
@@ -268,6 +334,7 @@ public class MainActivity extends ARActivity implements SensorEventListener {
         beaconManager.stopRanging(region6);
         beaconManager.stopRanging(region7);
         super.onPause();
+
     }
 
 //    private List<String> placesNearBeacon(Beacon beacon) {
@@ -339,7 +406,7 @@ public class MainActivity extends ARActivity implements SensorEventListener {
 
     // IMU related methods
     public void onSensorChanged(SensorEvent event) {
-        Log.d("T", "sensor changed!");
+  //      Log.d("T", "sensor changed!");
         // we received a sensor event. it is a good practice to check
         // that we received the proper event
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -371,4 +438,17 @@ public class MainActivity extends ARActivity implements SensorEventListener {
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
+
+    @Override
+    public void cameraPreviewFrame(byte[] frame) {
+        super.cameraPreviewFrame(frame);
+     //   Log.d("T", "framelength:" + String.valueOf(frame.length));
+        this.myframe = frame;
+        this.getCameraPreview();
+    }
+    //    @Override
+//    public void onPreviewFrame(byte[] bytes, android.hardware.Camera camera) {
+//        Log.d("T", "on Preview frame!");
+//    }
+
 }
