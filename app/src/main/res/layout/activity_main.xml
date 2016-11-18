@@ -120,4 +120,11 @@
         android:layout_toEndOf="@+id/gl_layout"
         android:id="@+id/button" />
 
+    <FrameLayout
+        android:id="@+id/mainLayout2"
+        android:orientation="vertical"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginLeft="300dp"/>
+
 </RelativeLayout>

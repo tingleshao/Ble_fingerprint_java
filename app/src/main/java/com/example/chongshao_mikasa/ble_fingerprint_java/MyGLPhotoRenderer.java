@@ -69,7 +69,9 @@ public class MyGLPhotoRenderer implements GLSurfaceView.Renderer {
         gl.glRotatef(mAngle, 0.0f, 0.0f, 1.0f);
         // Draw triangle
         //     triangle.draw(gl);
-        rect.setBitMap(bitmap);
+        rect = new PhotoSquare(bitmap);
+
+    //    rect.setBitMap(bitmap);
         rect.draw(gl);
     }
 

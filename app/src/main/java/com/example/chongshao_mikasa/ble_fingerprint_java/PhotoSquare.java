@@ -59,7 +59,28 @@ public class PhotoSquare {
         textureBuffer.put(texture);
         textureBuffer.position(0);
     }
+    public PhotoSquare(Bitmap bitmap) {
 
+        // a float has 4 bytes so we allocate for each coordinate 4 bytes
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+
+        // allocates the memory from the byte buffer
+        vertexBuffer = byteBuffer.asFloatBuffer();
+
+        // fill the vertexBuffer with the vertices
+        vertexBuffer.put(vertices);
+
+        // set the cursor position to the beginning of the buffer
+        vertexBuffer.position(0);
+
+        byteBuffer = ByteBuffer.allocateDirect(texture.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        textureBuffer = byteBuffer.asFloatBuffer();
+        textureBuffer.put(texture);
+        textureBuffer.position(0);
+        this.bitmap = bitmap;
+    }
 
     public void setBitMap(Bitmap bitmap) {
         this.bitmap = bitmap;
@@ -113,6 +134,7 @@ public class PhotoSquare {
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
 
         }
+        else {Log.d("T", "bitmap null!");}
         // System.out.println("draw");
         // bind the previously generated texture
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);

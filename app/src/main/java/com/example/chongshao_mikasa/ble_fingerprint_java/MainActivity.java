@@ -5,6 +5,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -38,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import android.view.ViewGroup.LayoutParams;
 
 public class MainActivity extends ARActivity implements SensorEventListener  {
 
@@ -94,6 +99,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     ImageView image;
     byte[] myframe;
 
+    private MyCaptureCameraPreview preview;
+    FrameLayout mainLayout2;
+    ImageView imageView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +109,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         simpleRenderer.setActivity(this);
 
         mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
+        mainLayout2 = (FrameLayout)this.findViewById(R.id.mainLayout2);
+        imageView = new ImageView(this);
+        mainLayout2.addView(imageView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
         beacon0 = (TextView)this.findViewById(R.id.beacon0);
         beacon1 = (TextView)this.findViewById(R.id.beacon1);
@@ -250,12 +261,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                //     cam.getDrawingCache();
                     MySurfaceView2 view2 = (MySurfaceView2)MainActivity.this.findViewById(R.id.gl_layout2);
                  //   view2.setBitmap(cam.getDrawingCache());
-                    mainLayout.setDrawingCacheEnabled(true);
-                    mainLayout.buildDrawingCache();
+            //        mainLayout.setDrawingCacheEnabled(true);
+              //      mainLayout.buildDrawingCache();
               //      mainLayout.get
-                    Bitmap bm = mainLayout.getDrawingCache();
+                //    Bitmap bm = mainLayout.getDrawingCache();
 
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(MainActivity.this.myframe, 0, MainActivity.this.myframe.length);
+                //    Bitmap bitmap = BitmapFactory.decodeByteArray(MainActivity.this.myframe, 0, MainActivity.this.myframe.length);
 
                     //          image.setMinimumHeight(40);
            //         image.setMinimumWidth(40);
@@ -264,11 +275,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
               //      RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
                //     image.setLayoutParams(layoutParams);
               //      Log.d("T", "imageview visible" + String.valueOf(image.getVisibility()==View.VISIBLE) +String.valueOf(image.getWidth())+String.valueOf(image.getHeight()));
-                    if (bitmap!=null) {
+                    Bitmap bitmap = MainActivity.this.preview.getBitmap();
+                    Bitmap gbitmap = toGrayscale(bitmap);
+                    if (gbitmap!=null) {
                 //        image.setImageBitmap(bm);
-                        view2.setBitmap(bitmap);
-                        Log.d("T", "bm not null" + String.valueOf(MainActivity.this.myframe.length));
-
+                        imageView.setImageBitmap(gbitmap);
+                        view2.setBitmap(gbitmap);
+//                        Log.d("T", "bm not null" + String.valueOf(MainActivity.this.myframe.length));
                     }
                     else {
                         Log.d("T", "bm null!"+ String.valueOf(MainActivity.this.myframe.length));
@@ -287,6 +300,23 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 //                        saveBitMap, "foo2", "bar2"); //TODO: change this file name later
             }
         });
+    }
+
+    public Bitmap toGrayscale(Bitmap bmpOriginal)
+    {
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+
+        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpGrayscale);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return bmpGrayscale;
     }
 
     private void updateARObjDirection() {
@@ -321,6 +351,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 beaconManager.startRanging(region7);
             }
         });
+
+        preview = new MyCaptureCameraPreview(this, this);
+        mainLayout.addView(preview, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+
     }
 
     @Override
@@ -334,6 +368,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         beaconManager.stopRanging(region6);
         beaconManager.stopRanging(region7);
         super.onPause();
+        mainLayout.removeView(preview);
+
 
     }
 
@@ -438,17 +474,17 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-
-    @Override
-    public void cameraPreviewFrame(byte[] frame) {
-        super.cameraPreviewFrame(frame);
-     //   Log.d("T", "framelength:" + String.valueOf(frame.length));
-        this.myframe = frame;
-        this.getCameraPreview();
-    }
-    //    @Override
-//    public void onPreviewFrame(byte[] bytes, android.hardware.Camera camera) {
-//        Log.d("T", "on Preview frame!");
+//
+//    @Override
+//    public void cameraPreviewFrame(byte[] frame) {
+//        super.cameraPreviewFrame(frame);
+//     //   Log.d("T", "framelength:" + String.valueOf(frame.length));
+//        this.myframe = frame;
+//        this.getCameraPreview();
 //    }
 
+    @Override
+    public CaptureCameraPreview getCameraPreview() {
+        return preview;
+    }
 }
