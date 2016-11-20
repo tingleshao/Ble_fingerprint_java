@@ -89,14 +89,6 @@
         android:layout_height="125dp" />
 
 
-    <com.example.chongshao_mikasa.ble_fingerprint_java.MySurfaceView2
-        android:id="@+id/gl_layout2"
-        android:orientation="horizontal"
-        android:layout_marginLeft="250dp"
-        android:layout_marginTop="125dp"
-        android:layout_width="125dp"
-        android:layout_height="125dp" />
-
     <FrameLayout
         android:id="@+id/mainLayout"
         android:orientation="vertical"
@@ -123,8 +115,9 @@
     <FrameLayout
         android:id="@+id/mainLayout2"
         android:orientation="vertical"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginLeft="300dp"/>
+        android:layout_marginLeft="250dp"
+        android:layout_height="125dp"
+        android:layout_width="125dp"
+        android:layout_marginTop="125dp" />
 
 </RelativeLayout>

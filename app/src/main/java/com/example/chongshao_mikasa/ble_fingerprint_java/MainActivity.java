@@ -46,8 +46,10 @@ import java.util.UUID;
 import android.view.ViewGroup.LayoutParams;
 
 import org.opencv.android.Utils;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
+import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
@@ -56,6 +58,7 @@ import org.opencv.core.Point;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
+import org.opencv.imgproc.Imgproc;
 
 
 public class MainActivity extends ARActivity implements SensorEventListener  {
@@ -271,7 +274,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 cam = MainActivity.this.getCameraPreview();
                 if (cam != null) {
                //     cam.getDrawingCache();
-                    MySurfaceView2 view2 = (MySurfaceView2)MainActivity.this.findViewById(R.id.gl_layout2);
+              //      MySurfaceView2 view2 = (MySurfaceView2)MainActivity.this.findViewById(R.id.gl_layout2);
                  //   view2.setBitmap(cam.getDrawingCache());
             //        mainLayout.setDrawingCacheEnabled(true);
               //      mainLayout.buildDrawingCache();
@@ -292,7 +295,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                     if (gbitmap!=null) {
                 //        image.setImageBitmap(bm);
                         imageView.setImageBitmap(gbitmap);
-                        view2.setBitmap(gbitmap);
+              //          view2.setBitmap(gbitmap);
 //                        Log.d("T", "bm not null" + String.valueOf(MainActivity.this.myframe.length));
                     }
                     else {
@@ -381,8 +384,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         beaconManager.stopRanging(region7);
         super.onPause();
         mainLayout.removeView(preview);
-
-
     }
 
 //    private List<String> placesNearBeacon(Beacon beacon) {
@@ -533,7 +534,33 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         double maxDist = 0;
         double minDist = 100;
-        List<DMatch> matchesList = 
+        List<DMatch> matchesList = matches.toList();
+        for (int i = 0; i < descriptorsObject.rows(); i++) {
+            Double dist = (double) matchesList.get(i).distance;
+            if( dist < minDist ) minDist = dist;
+            if( dist > maxDist ) maxDist = dist;
+        }
+        for(int i = 0; i < descriptorsObject.rows(); i++) {
+            if(matchesList.get(i).distance < 3 * minDist){
+                goodMatches.addLast(matchesList.get(i)); // get good matches
+            }
+        }
 
+        gm.fromList(goodMatches);
+
+        List<KeyPoint> keyPointsObjectList = keyPointsObject.toList();
+        List<KeyPoint> keyPointsSceneList = keyPointScene.toList();
+        for(int i = 0; i< goodMatches.size(); i++) {
+            objList.addLast(keyPointsObjectList.get(goodMatches.get(i).queryIdx).pt);
+            sceneList.addLast(keyPointsSceneList.get(goodMatches.get(i).trainIdx).pt);
+        }
+
+        obj.fromList(objList);
+        scene.fromList(sceneList);
+
+        Mat matH = Calib3d.findHomography(obj, scene);
+        Mat warping = mat1.clone();
+        org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
+        Imgproc.warpPerspective(mat1, warping , matH, ims);
     }
 }
