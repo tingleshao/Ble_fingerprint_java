@@ -39,12 +39,28 @@ import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import android.view.ViewGroup.LayoutParams;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.DMatch;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.DescriptorMatcher;
+import org.opencv.features2d.FeatureDetector;
+
+
 public class MainActivity extends ARActivity implements SensorEventListener  {
+
+    Core.MinMaxLocResult minmax;
 
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 133;
 
@@ -84,9 +100,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     private float rotationX = 0;
     private float rotationY = 0;
     private float rotationZ = 0;
-    private float accelX = 0;
-    private float accelY = 0;
-    private float accelZ = 0;
 
     private TextView rotationMsg;
 
@@ -96,7 +109,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     CaptureCameraPreview cam;
     Button button;
-    ImageView image;
     byte[] myframe;
 
     private MyCaptureCameraPreview preview;
@@ -450,10 +462,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             mAccelerometerMatrix[1] = event.values[1];
             mAccelerometerMatrix[2] = event.values[2];
             mAccelerometerMatrix[3] = 0;
-
-            accelX = event.values[0];
-            accelY = event.values[1];
-            accelZ = event.values[2];
         }
 
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
@@ -486,5 +494,46 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     @Override
     public CaptureCameraPreview getCameraPreview() {
         return preview;
+    }
+
+    // Camera pose related stuff
+    public void estimatePose(Bitmap bitmap1, Bitmap bitmap2) {
+        Mat mat1 = new Mat();
+        Mat mat2 = new Mat();
+        Utils.bitmapToMat(bitmap1, mat1);
+        Utils.bitmapToMat(bitmap2, mat2);
+
+        MatOfDMatch matches = new MatOfDMatch();
+        MatOfDMatch gm = new MatOfDMatch();
+
+        LinkedList<DMatch> goodMatches = new LinkedList<>();
+        LinkedList<Point> objList = new LinkedList<>();
+        LinkedList<Point> sceneList = new LinkedList<>();
+
+        MatOfKeyPoint keyPointsObject = new MatOfKeyPoint();
+        MatOfKeyPoint keyPointScene = new MatOfKeyPoint();
+
+        Mat descriptorsObject = new Mat();
+        Mat descriptorsScene = new Mat();
+
+        MatOfPoint2f obj = new MatOfPoint2f();
+        MatOfPoint2f scene = new MatOfPoint2f();
+
+        FeatureDetector fd = FeatureDetector.create(FeatureDetector.ORB);
+        fd.detect(mat1, keyPointsObject);
+        fd.detect(mat2, keyPointScene); // find orb features
+
+        int con = 3;
+        DescriptorExtractor extractor = DescriptorExtractor.create(con);
+        extractor.compute(mat1, keyPointsObject, descriptorsObject); // extract descriptor
+        extractor.compute(mat2, keyPointScene, descriptorsScene);
+
+        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+        matcher.match(descriptorsObject, descriptorsScene, matches); // match descriptor
+
+        double maxDist = 0;
+        double minDist = 100;
+        List<DMatch> matchesList = 
+
     }
 }
