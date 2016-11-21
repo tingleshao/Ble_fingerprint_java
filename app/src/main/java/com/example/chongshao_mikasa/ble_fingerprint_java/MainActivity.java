@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -14,18 +13,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +33,9 @@ import org.artoolkit.ar.base.ARActivity;
 import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,20 +43,31 @@ import java.util.Map;
 import java.util.UUID;
 import android.view.ViewGroup.LayoutParams;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
+
+import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
+import static org.opencv.imgcodecs.Imgcodecs.imdecode;
+import static org.opencv.imgcodecs.Imgcodecs.imread;
 
 
 public class MainActivity extends ARActivity implements SensorEventListener  {
@@ -88,7 +97,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     private String closestUUID = "no";
     private Map<String, Integer> beaconDistance = new HashMap<>();
-    // private SimpleRenderer simpleRenderer = new SimpleRenderer();
     private SimpleRenderer simpleRenderer = new SimpleRenderer();
     Map<String, Integer> beaconAngle = new HashMap<String, Integer>();
     Map<String, String> beaconUUID = new HashMap<>();
@@ -117,6 +125,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     private MyCaptureCameraPreview preview;
     FrameLayout mainLayout2;
     ImageView imageView;
+
+    Mat image;
+    Mat mask;
+    FeatureDetector detector;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -264,39 +276,19 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         //camera stuff
         cam = this.getCameraPreview();
-     //   cam.getDrawingCache();
 
         button = (Button)this.findViewById(R.id.button);
-     //   image = (ImageView)this.findViewById(R.id.imageView);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cam = MainActivity.this.getCameraPreview();
                 if (cam != null) {
-               //     cam.getDrawingCache();
-              //      MySurfaceView2 view2 = (MySurfaceView2)MainActivity.this.findViewById(R.id.gl_layout2);
-                 //   view2.setBitmap(cam.getDrawingCache());
-            //        mainLayout.setDrawingCacheEnabled(true);
-              //      mainLayout.buildDrawingCache();
-              //      mainLayout.get
-                //    Bitmap bm = mainLayout.getDrawingCache();
-
-                //    Bitmap bitmap = BitmapFactory.decodeByteArray(MainActivity.this.myframe, 0, MainActivity.this.myframe.length);
-
-                    //          image.setMinimumHeight(40);
-           //         image.setMinimumWidth(40);
-             //       ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(image.getLayoutParams());
-             //       marginParams.setMargins(0, 0, 0, 0);
-              //      RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
-               //     image.setLayoutParams(layoutParams);
-              //      Log.d("T", "imageview visible" + String.valueOf(image.getVisibility()==View.VISIBLE) +String.valueOf(image.getWidth())+String.valueOf(image.getHeight()));
                     Bitmap bitmap = MainActivity.this.preview.getBitmap();
-                    Bitmap gbitmap = toGrayscale(bitmap);
-                    if (gbitmap!=null) {
-                //        image.setImageBitmap(bm);
-                        imageView.setImageBitmap(gbitmap);
-              //          view2.setBitmap(gbitmap);
-//                        Log.d("T", "bm not null" + String.valueOf(MainActivity.this.myframe.length));
+
+                //    Bitmap bitmapg = toGrayscale(bitmap);
+                    Bitmap bitmap2 = locateFeaturePoint(bitmap);
+                    if (bitmap2!=null) {
+                        imageView.setImageBitmap(bitmap2);
                     }
                     else {
                         Log.d("T", "bm null!"+ String.valueOf(MainActivity.this.myframe.length));
@@ -306,15 +298,93 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 else {
                     Log.d("T", "cam null");
                 }
-//                debug.setText("right save button clicked!");
-//                saveRightSensorData();
-//                Bitmap saveBitMap = matToBitMap(rightImage, rightImage.width());
-//                storeImage(saveBitMap);
-//
-//                MediaStore.Images.Media.insertImage(getContentResolver(),
-//                        saveBitMap, "foo2", "bar2"); //TODO: change this file name later
             }
         });
+    }
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i("OpenCV", "OpenCV loaded successfully");
+                    image = new Mat();
+                    mask = new Mat();
+                    detector = FeatureDetector.create(FeatureDetector.HARRIS);
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
+
+    private static Mat readInputStreamIntoMat(InputStream inputStream) throws IOException {
+        // Read into byte-array
+        byte[] temporaryImageInMemory = readStream(inputStream);
+
+        // Decode into mat. Use any IMREAD_ option that describes your image appropriately
+        Mat outputImage = imdecode(new MatOfByte(temporaryImageInMemory), IMREAD_GRAYSCALE);
+
+        return outputImage;
+    }
+
+    private static byte[] readStream(InputStream stream) throws IOException {
+        // Copy content of the image to byte-array
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[16384];
+
+        while ((nRead = stream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+
+        buffer.flush();
+        byte[] temporaryImageInMemory = buffer.toByteArray();
+        buffer.close();
+        stream.close();
+        return temporaryImageInMemory;
+    }
+
+    public Bitmap locateFeaturePoint(Bitmap input) {
+
+        Bitmap bMap= BitmapFactory.decodeResource(getResources(),R.drawable.box);
+        Utils.bitmapToMat(bMap, image);
+     //   InputStream inpT = getResources().openRawResource(R.drawable.box);
+     //   try {
+     //       image = readInputStreamIntoMat(inpT);
+     //   } catch (IOException e) {
+     //       Log.d("E", "IO Exception");
+      //  }
+
+     //   Utils.bitmapToMat(input, image);
+        Mat imagei = new Mat();
+        Imgproc.cvtColor(image,  imagei, Imgproc.COLOR_RGBA2GRAY);
+        Utils.matToBitmap(imagei, bMap);
+        Mat image2 = imread("box.png", CV_LOAD_IMAGE_GRAYSCALE);
+
+        MatOfKeyPoint keypoints = new MatOfKeyPoint();
+        detector.detect(imagei, keypoints);
+
+        Log.d("T", "image width:" + String.valueOf(imagei.width()) + " " + String.valueOf(imagei.height()));
+        Log.d("T", "image2 width:" + String.valueOf(image2.width()) + " " + String.valueOf(image2.height()));
+
+        //   Bitmap bitmap2 = this.preview.getBitmap();
+        Log.d("T", "keypoints size: " + String.valueOf(keypoints.size()));
+    //    if (!detector.empty()){
+            // Draw kewpoints
+            Mat outputImage = new Mat();
+            Scalar color = new Scalar(0, 0, 255); // BGR
+            int flags = Features2d.DRAW_RICH_KEYPOINTS; // For each keypoint, the circle around keypoint with keypoint size and orientation will be drawn.
+            Features2d.drawKeypoints(imagei, keypoints, outputImage, color , flags);
+            Utils.matToBitmap(outputImage, bMap);
+            //        displayImage(Mat2BufferedImage(outputImage), "Feautures_"+detectorType);
+     //   }
+    //    else {
+     //       Log.d("T", "detector empty!");
+     //   }
+        return bMap;
     }
 
     public Bitmap toGrayscale(Bitmap bmpOriginal)
@@ -370,6 +440,14 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         preview = new MyCaptureCameraPreview(this, this);
         mainLayout.addView(preview, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
+        // Load OpenCV
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+        } else {
+            Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 
     @Override
