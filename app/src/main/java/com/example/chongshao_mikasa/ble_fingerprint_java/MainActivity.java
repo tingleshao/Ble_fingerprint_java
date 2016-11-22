@@ -348,43 +348,23 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     }
 
     public Bitmap locateFeaturePoint(Bitmap input) {
-
-        Bitmap bMap= BitmapFactory.decodeResource(getResources(),R.drawable.box);
-        Utils.bitmapToMat(bMap, image);
-     //   InputStream inpT = getResources().openRawResource(R.drawable.box);
-     //   try {
-     //       image = readInputStreamIntoMat(inpT);
-     //   } catch (IOException e) {
-     //       Log.d("E", "IO Exception");
-      //  }
-
-     //   Utils.bitmapToMat(input, image);
+        Utils.bitmapToMat(input, image);
         Mat imagei = new Mat();
         Imgproc.cvtColor(image,  imagei, Imgproc.COLOR_RGBA2GRAY);
-        Utils.matToBitmap(imagei, bMap);
-        Mat image2 = imread("box.png", CV_LOAD_IMAGE_GRAYSCALE);
 
         MatOfKeyPoint keypoints = new MatOfKeyPoint();
         detector.detect(imagei, keypoints);
 
         Log.d("T", "image width:" + String.valueOf(imagei.width()) + " " + String.valueOf(imagei.height()));
-        Log.d("T", "image2 width:" + String.valueOf(image2.width()) + " " + String.valueOf(image2.height()));
-
-        //   Bitmap bitmap2 = this.preview.getBitmap();
         Log.d("T", "keypoints size: " + String.valueOf(keypoints.size()));
-    //    if (!detector.empty()){
-            // Draw kewpoints
+
             Mat outputImage = new Mat();
             Scalar color = new Scalar(0, 0, 255); // BGR
             int flags = Features2d.DRAW_RICH_KEYPOINTS; // For each keypoint, the circle around keypoint with keypoint size and orientation will be drawn.
             Features2d.drawKeypoints(imagei, keypoints, outputImage, color , flags);
-            Utils.matToBitmap(outputImage, bMap);
-            //        displayImage(Mat2BufferedImage(outputImage), "Feautures_"+detectorType);
-     //   }
-    //    else {
-     //       Log.d("T", "detector empty!");
-     //   }
-        return bMap;
+            Utils.matToBitmap(outputImage, input);
+
+        return input;
     }
 
     public Bitmap toGrayscale(Bitmap bmpOriginal)
