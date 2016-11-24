@@ -107,10 +107,10 @@
         android:text="TextView"
         android:layout_width="150dp"
         android:layout_height="60dp"
-        android:layout_below="@+id/gl_layout"
-        android:layout_alignEnd="@+id/beacon7"
         android:layout_marginTop="40dp"
-        android:id="@+id/rotationMsg" />
+        android:id="@+id/rotationMsg"
+        android:layout_marginLeft="400dp"
+        android:textSize="5sp" />
 
     <Button
         android:text="Button"
@@ -123,9 +123,107 @@
     <FrameLayout
         android:id="@+id/mainLayout2"
         android:orientation="vertical"
-        android:layout_marginLeft="400dp"
+        android:layout_marginLeft="480dp"
         android:layout_height="125dp"
         android:layout_width="125dp"
         android:layout_marginTop="125dp" />
+
+    <Button
+        android:text="xup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gl_layout"
+        android:layout_toEndOf="@+id/mainLayout"
+        android:id="@+id/button2" />
+
+    <Button
+        android:text="xdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gl_layout"
+        android:layout_alignEnd="@+id/button2"
+        android:layout_marginEnd="0dp"
+        android:layout_marginTop="45dp"
+        android:id="@+id/button4" />
+
+    <Button
+        android:text="yup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button4"
+        android:layout_alignEnd="@+id/button2"
+        android:id="@+id/button5" />
+
+    <Button
+        android:text="ydown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/button2"
+        android:layout_toEndOf="@+id/button2"
+        android:id="@+id/button6" />
+
+    <Button
+        android:text="zup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button5"
+        android:layout_alignEnd="@+id/button6"
+        android:id="@+id/button7" />
+
+    <Button
+        android:text="zdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button7"
+        android:layout_toEndOf="@+id/button5"
+        android:id="@+id/button8" />
+
+    <Button
+        android:text="r1up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/button6"
+        android:layout_toEndOf="@+id/button6"
+        android:id="@+id/button9" />
+
+    <Button
+        android:text="r2up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button8"
+        android:layout_toEndOf="@+id/button8"
+        android:id="@+id/button10" />
+
+    <Button
+        android:text="r3up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button10"
+        android:layout_toEndOf="@+id/button8"
+        android:id="@+id/button11" />
+
+    <Button
+        android:text="r1down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button9"
+        android:layout_toEndOf="@+id/button9"
+        android:id="@+id/button12" />
+
+    <Button
+        android:text="r2down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button10"
+        android:layout_toEndOf="@+id/button10"
+        android:id="@+id/button13" />
+
+    <Button
+        android:text="r3down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/button11"
+        android:layout_toEndOf="@+id/button10"
+        android:id="@+id/button14" />
 
 </RelativeLayout>

@@ -129,6 +129,22 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     Mat image;
     Mat mask;
     FeatureDetector detector;
+
+    // control translation
+    Button xup;
+    Button xdown;
+    Button yup;
+    Button ydown;
+    Button zup;
+    Button zdown;
+
+    Button r1up;
+    Button r1down;
+    Button r2up;
+    Button r2down;
+    Button r3up;
+    Button r3down;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -300,7 +316,55 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 }
             }
         });
+
+        // control translation
+        xup = (Button)this.findViewById(R.id.button2);
+        xdown = (Button)this.findViewById(R.id.button4);
+        yup = (Button)this.findViewById(R.id.button5);
+        ydown = (Button)this.findViewById(R.id.button6);
+        zup = (Button)this.findViewById(R.id.button7);
+        zdown = (Button)this.findViewById(R.id.button8);
+
+        xup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.xup();
+            }
+        });
+        xdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.xdown();
+            }
+        });
+        yup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.yup();
+            }
+        });
+        ydown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.ydown();
+            }
+        });
+        zup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zup();
+            }
+        });
+        zdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
+
+
     }
+
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {

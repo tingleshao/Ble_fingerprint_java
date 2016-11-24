@@ -29,6 +29,8 @@ public class SimpleRenderer extends ARRenderer  {
     Map<String, Integer> beaconAngle = new HashMap<String, Integer>();
     MainActivity activity;
 
+    float[] m;
+
 
     public void setActivity(MainActivity activity) {
         this.activity = activity;
@@ -44,6 +46,11 @@ public class SimpleRenderer extends ARRenderer  {
         beaconAngle.put("9aa9bca6-b207-41f5-a076-d294c9b374db", 225);
         beaconAngle.put("21f158a6-a083-4020-9b40-8cd34380ffc3", 270);
         beaconAngle.put("7691f1bd-284f-439d-8b1a-d223f0249b9b", 315);
+     //   m = new float[16];
+        m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
+                -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
+                0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
+                -104.001564f, -24.064268f, -271.0829f, 1.0f};
     }
 
     public void setRAngle(float angle) {
@@ -67,6 +74,30 @@ public class SimpleRenderer extends ARRenderer  {
         spinning = !spinning;
     }
 
+    public void xup() {
+        this.m[12] += 5.0f;
+    }
+
+    public void xdown() {
+        this.m[12] -= 5.0f;
+    }
+
+    public void yup() {
+        this.m[13] += 5.0f;
+    }
+
+    public void ydown() {
+        this.m[13] -= 5.0f;
+    }
+
+    public void zup() {
+        this.m[14] += 5.0f;
+    }
+
+    public void zdown() {
+        this.m[14] -= 5.0f;
+    }
+
     public void draw(GL10 gl) {
         this.drawCount += 1;
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
@@ -83,10 +114,7 @@ public class SimpleRenderer extends ARRenderer  {
 
         //   if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
         //     float[] m = ARToolKit.getInstance().queryMarkerTransformation(markerID);
-        float[] m = {-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
-                -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
-                0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
-                -104.001564f, -24.064268f, -271.0829f, 1.0f};
+
 
         float xangle;
         if (beaconAngle.get(activity.getClosestUUID()) == null) {
@@ -95,9 +123,9 @@ public class SimpleRenderer extends ARRenderer  {
         else {
             xangle = (float)beaconAngle.get(activity.getClosestUUID());
         }
-//        Log.d("T", "Xangle:" +  String.valueOf(xangle));
 
         Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
+
         gl.glLoadMatrixf(m, 0);
         gl.glPushMatrix();
         gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
@@ -106,6 +134,5 @@ public class SimpleRenderer extends ARRenderer  {
         gl.glPopMatrix();
 
         if (spinning) angle += 5.0f;
-        //   }
     }
 }
