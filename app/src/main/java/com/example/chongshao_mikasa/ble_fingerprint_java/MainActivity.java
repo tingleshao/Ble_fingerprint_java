@@ -12,6 +12,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Environment;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -34,6 +35,8 @@ import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -145,6 +148,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     Button r2down;
     Button r3up;
     Button r3down;
+
+    // record fingerprint
+    private String filename = "fingerprint.txt";
+    private String filepath = "MyFileStorage";
+    File myExternalFile;
+    Button record;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -406,6 +415,29 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 MainActivity.this.simpleRenderer.zdown();
             }
         });
+
+        // record fingerprint
+        record = (Button)this.findViewById(R.id.record);
+        record.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    FileOutputStream fos = new FileOutputStream(myExternalFile);
+                    fos.write("foo".getBytes());
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
+
+        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
+            record.setEnabled(false);
+        }
+        else {
+            myExternalFile = new File(getExternalFilesDir(filepath), filename);
+        }
+
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -728,4 +760,32 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
         Imgproc.warpPerspective(mat1, warping , matH, ims);
     }
+
+    // Beacon accurate localization method
+    // Save the fingerprint
+    public void saveFingerprint(String location, Integer[] fingerprint) {
+
+    }
+
+    public String matchFinterprint(Integer fingerprint) {
+        return "foo";
+    }
+
+
+    private static boolean isExternalStorageReadOnly() {
+        String extStorageState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isExternalStorageAvailable() {
+        String extStorageState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
+            return true;
+        }
+        return false;
+    }
+
 }

@@ -109,7 +109,7 @@
         android:layout_height="60dp"
         android:layout_marginTop="40dp"
         android:id="@+id/rotationMsg"
-        android:layout_marginLeft="400dp"
+        android:layout_marginLeft="450dp"
         android:textSize="5sp" />
 
     <Button
@@ -225,5 +225,23 @@
         android:layout_alignBottom="@+id/button11"
         android:layout_toEndOf="@+id/button10"
         android:id="@+id/button14" />
+
+    <Button
+        android:text="record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button9"
+        android:layout_toEndOf="@+id/gl_layout"
+        android:id="@+id/record" />
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="Name"
+        android:ems="10"
+        android:layout_below="@+id/beacon5"
+        android:layout_toEndOf="@+id/gl_layout"
+        android:id="@+id/editText"
+        android:layout_width="70dp" />
 
 </RelativeLayout>

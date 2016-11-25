@@ -37,7 +37,6 @@ public class SimpleRenderer extends ARRenderer  {
     float angle2;
     float angle3;
 
-
     public void setActivity(MainActivity activity) {
         this.activity = activity;
     }
@@ -57,6 +56,20 @@ public class SimpleRenderer extends ARRenderer  {
                 -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
                 0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
                 -104.001564f, -24.064268f, -271.0829f, 1.0f};
+        float[] rotateM = new float[9];
+        rotateM[0] = m[0];
+        rotateM[1] = m[1];
+        rotateM[2] = m[2];
+        rotateM[3] = m[4];
+        rotateM[4] = m[5];
+        rotateM[5] = m[6];
+        rotateM[6] = m[8];
+        rotateM[7] = m[9];
+        rotateM[8] = m[10];
+        float[] angles = mToAngles(rotateM);
+        angle1 = angles[0];
+        angle2 = angles[1];
+        angle3 = angles[2];
     }
 
     public void setRAngle(float angle) {
@@ -79,7 +92,6 @@ public class SimpleRenderer extends ARRenderer  {
     public void click() {
         spinning = !spinning;
     }
-
 
     // TODO: merge every two to 1 method
     public void xup() {
@@ -122,10 +134,20 @@ public class SimpleRenderer extends ARRenderer  {
     }
 
     public void updateM() {
-
+       float[] angles = {angle1, angle2, angle3};
+        float[] rotateM = anglesToM(angles);
+        m[0] = rotateM[0];
+        m[1] = rotateM[1];
+        m[2] = rotateM[2];
+        m[4] = rotateM[3];
+        m[5] = rotateM[4];
+        m[6] = rotateM[5];
+        m[8] = rotateM[6];
+        m[9] = rotateM[7];
+        m[10] = rotateM[8];
     }
 
-    public float[] mToAngles(float[] m) {
+    public static float[] mToAngles(float[] m) {
         // TODO: here maybe the angle is inverted. Let's see
         double sy = Math.sqrt((double)(m[0] * m[0] + m[1] * m[1]));
         boolean singular = sy < 0.000001;
@@ -143,7 +165,7 @@ public class SimpleRenderer extends ARRenderer  {
         return angles;
     }
 
-    public float[] anglesToM(float[] angles) {
+    public static float[] anglesToM(float[] angles) {
         float angle1 = angles[0];
         float angle2 = angles[1];
         float angle3 = angles[2];
@@ -202,12 +224,12 @@ public class SimpleRenderer extends ARRenderer  {
         return zyx;
     }
 
-    public float sind(float angle) {
+    public static float sind(float angle) {
         double angleinradius = Math.PI * (double)angle / 180.0;
         return (float)Math.sin(angleinradius);
     }
 
-    public float cosd(float angle) {
+    public static float cosd(float angle) {
         double angleinradius = Math.PI * (double)angle / 180.0;
         return (float)Math.cos(angleinradius);
     }
@@ -228,7 +250,6 @@ public class SimpleRenderer extends ARRenderer  {
 
         //   if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
         //     float[] m = ARToolKit.getInstance().queryMarkerTransformation(markerID);
-
 
         float xangle;
         if (beaconAngle.get(activity.getClosestUUID()) == null) {
