@@ -6,6 +6,9 @@ import android.util.Log;
 import org.artoolkit.ar.base.ARToolKit;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.artoolkit.ar.base.rendering.Arrow;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +33,9 @@ public class SimpleRenderer extends ARRenderer  {
     MainActivity activity;
 
     float[] m;
+    float angle1;
+    float angle2;
+    float angle3;
 
 
     public void setActivity(MainActivity activity) {
@@ -74,6 +80,8 @@ public class SimpleRenderer extends ARRenderer  {
         spinning = !spinning;
     }
 
+
+    // TODO: merge every two to 1 method
     public void xup() {
         this.m[12] += 5.0f;
     }
@@ -96,6 +104,112 @@ public class SimpleRenderer extends ARRenderer  {
 
     public void zdown() {
         this.m[14] -= 5.0f;
+    }
+
+    public void rotate1(float delta_angle) {
+        this.angle1 += delta_angle;
+        updateM();
+    }
+
+    public void rotate2(float delta_angle) {
+        this.angle2 += delta_angle;
+        updateM();
+    }
+
+    public void rotate3(float delta_angle) {
+        this.angle3 += delta_angle;
+        updateM();
+    }
+
+    public void updateM() {
+
+    }
+
+    public float[] mToAngles(float[] m) {
+        // TODO: here maybe the angle is inverted. Let's see
+        double sy = Math.sqrt((double)(m[0] * m[0] + m[1] * m[1]));
+        boolean singular = sy < 0.000001;
+        double x, y, z;
+        if (singular) {
+            x = Math.atan(-m[7] / m[4]);
+            y = Math.atan(-m[2] / sy);
+            z = 0.0;
+        } else {
+            x = Math.atan(m[5] / m[8]);
+            y = Math.atan(-m[2] / sy);
+            z = Math.atan(m[1] / m[0]);
+        }
+        float[] angles = {(float)x, (float)y, (float)z};
+        return angles;
+    }
+
+    public float[] anglesToM(float[] angles) {
+        float angle1 = angles[0];
+        float angle2 = angles[1];
+        float angle3 = angles[2];
+        float[] matrixr3 = new float[9];
+        float[] matrixr2 = new float[9];
+        float[] matrixr1 = new float[9];
+
+        matrixr3[0] = cosd(angle3);
+        matrixr3[1] = -sind(angle3);
+        matrixr3[2] = 0.0f;
+        matrixr3[3] = sind(angle3);
+        matrixr3[4] = cosd(angle3);
+        matrixr3[5] = 0.0f;
+        matrixr3[6] = 0.0f;
+        matrixr3[7] = 0.0f;
+        matrixr3[8] = 1.0f;
+
+        matrixr2[0] = cosd(angle2);
+        matrixr2[1] = 0.0f;
+        matrixr2[2] = sind(angle2);
+        matrixr2[3] = 0.0f;
+        matrixr2[4] = 1.0f;
+        matrixr2[5] = 0.0f;
+        matrixr2[6] = -sind(angle2);
+        matrixr2[7] = 0.0f;
+        matrixr2[8] = cosd(angle2);
+
+        matrixr1[0] = 1.0f;
+        matrixr1[1] = 0.0f;
+        matrixr1[2] = 0.0f;
+        matrixr1[3] = 0.0f;
+        matrixr1[4] = cosd(angle1);
+        matrixr1[5] = -sind(angle1);
+        matrixr1[6] = 0.0f;
+        matrixr1[7] = sind(angle1);
+        matrixr1[8] = cosd(angle1);
+
+        float[] zyx = new float[9];
+
+        Mat matr1 = new Mat(3, 3, CvType.CV_32FC1);
+        Mat matr2 = new Mat(3, 3, CvType.CV_32FC1);
+        Mat matr3 = new Mat(3, 3, CvType.CV_32FC1);
+        for (int i = 0; i < 9; i++) {
+            matr1.put(i % 3, i / 3, matrixr1[i]);
+            matr2.put(i % 3, i / 3, matrixr2[i]);
+            matr3.put(i % 3, i / 3, matrixr3[i]);
+        }
+        Mat matzy = new Mat();
+        Mat matzyx = new Mat();
+        Core.multiply(matr3, matr2, matzy);
+        Core.multiply(matzy, matr1, matzyx);
+        for (int i = 0; i < 9; i++) {
+            double[] val = matzyx.get(i % 3, i / 3);
+            zyx[i] = (float)val[0];
+        }
+        return zyx;
+    }
+
+    public float sind(float angle) {
+        double angleinradius = Math.PI * (double)angle / 180.0;
+        return (float)Math.sin(angleinradius);
+    }
+
+    public float cosd(float angle) {
+        double angleinradius = Math.PI * (double)angle / 180.0;
+        return (float)Math.cos(angleinradius);
     }
 
     public void draw(GL10 gl) {

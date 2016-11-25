@@ -138,6 +138,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     Button zup;
     Button zdown;
 
+    // control rotation
     Button r1up;
     Button r1down;
     Button r2up;
@@ -362,7 +363,49 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             }
         });
 
-
+        // control rotation
+        r1up = (Button)this.findViewById(R.id.button9);
+        r1down = (Button)this.findViewById(R.id.button12);
+        r2up = (Button)this.findViewById(R.id.button10);
+        r2down = (Button)this.findViewById(R.id.button13);
+        r3up = (Button)this.findViewById(R.id.button11);
+        r3down = (Button)this.findViewById(R.id.button14);
+        r1up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
+        r1down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
+        r2up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
+        r2down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
+        r3up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
+        r3down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.zdown();
+            }
+        });
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
