@@ -3,7 +3,6 @@ package com.example.chongshao_mikasa.ble_fingerprint_java;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -19,9 +18,11 @@ import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -154,6 +156,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     private String filepath = "MyFileStorage";
     File myExternalFile;
     Button record;
+    Spinner spinner;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -423,6 +426,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 try {
                     FileOutputStream fos = new FileOutputStream(myExternalFile);
+                    ArrayList<Integer> fingerprint = MainActivity.getCurrentFingerPrint();
+                    //TODO: generate message to store
                     fos.write("foo".getBytes());
                     fos.close();
                 } catch (IOException e) {
@@ -437,7 +442,11 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         else {
             myExternalFile = new File(getExternalFilesDir(filepath), filename);
         }
-
+        spinner = (Spinner)this.findViewById(R.id.spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.fingerprints_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -763,14 +772,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     // Beacon accurate localization method
     // Save the fingerprint
-    public void saveFingerprint(String location, Integer[] fingerprint) {
+    public void saveFingerprint(String location, ArrayList<Integer> fingerprint) {
 
     }
 
     public String matchFinterprint(Integer fingerprint) {
         return "foo";
     }
-
 
     private static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
@@ -788,4 +796,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         return false;
     }
 
+    private static ArrayList<Integer> getCurrentFingerPrint() {
+        return null;
+    }
 }
