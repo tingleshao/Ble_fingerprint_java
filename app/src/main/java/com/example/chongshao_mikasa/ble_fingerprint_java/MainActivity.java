@@ -55,6 +55,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
@@ -69,6 +70,7 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.video.KalmanFilter;
 
 import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
@@ -319,8 +321,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                  //   Bitmap bitmap1g = toGrayscale(bitmap1);
                     Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
-                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.box); // TODO: change here later
-                    Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2);
+                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample0);
+                    Bitmap bitmap2g = toGrayscale(bitmap2);
+                    Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
 
                     if (combinedBitmap!=null) {
                         imageView.setImageBitmap(combinedBitmap);
@@ -738,7 +741,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Utils.bitmapToMat(bitmap2, mat2);
 
         // TODO: convert RGB to GRAY
-
         MatOfDMatch matches = new MatOfDMatch();
         MatOfDMatch gm = new MatOfDMatch();
 
@@ -797,7 +799,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Bitmap comboMap = combineImages(bitmap1, bitmap2);
         Utils.bitmapToMat(comboMap, outputImage);
 
-        //TODO: mat1 and mat2 may need to be rgb instead of RGBA
         Mat mat1rgb = new Mat();
         Mat mat2rgb = new Mat();
         Imgproc.cvtColor(mat1, mat1rgb, Imgproc.COLOR_RGBA2RGB, 1);
@@ -880,5 +881,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     private static ArrayList<Integer> getCurrentFingerPrint() {
         return null;
+    }
+
+    public void updateUsingKalmanFilter() {
+        KalmanFilter kalman = new KalmanFilter(4, 2, 0, CvType.CV_32F);
     }
 }

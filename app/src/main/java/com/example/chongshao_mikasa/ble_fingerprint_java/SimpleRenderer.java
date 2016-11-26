@@ -81,7 +81,6 @@ public class SimpleRenderer extends ARRenderer  {
                 String.valueOf(m[11]) + " " + String.valueOf(m[12]) + " " + String.valueOf(m[13]) + " " +
                 String.valueOf(m[14]) + " " + String.valueOf(m[15]));
 
-        // TODO: make all rotation -translation matrices based on cameraM and try....
         rotateM[0] = cameraM[0];
         rotateM[1] = cameraM[1];
         rotateM[2] = cameraM[2];
