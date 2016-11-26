@@ -3,6 +3,7 @@ package com.example.chongshao_mikasa.ble_fingerprint_java;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -313,12 +314,16 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 cam = MainActivity.this.getCameraPreview();
                 if (cam != null) {
-                    Bitmap bitmap = MainActivity.this.preview.getBitmap();
+                    Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
 
-                //    Bitmap bitmapg = toGrayscale(bitmap);
-                    Bitmap bitmap2 = locateFeaturePoint(bitmap);
-                    if (bitmap2!=null) {
-                        imageView.setImageBitmap(bitmap2);
+                 //   Bitmap bitmap1g = toGrayscale(bitmap1);
+                    Bitmap bitmap1f = locateFeaturePoint(bitmap1);
+
+                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.box); // TODO: change here later
+                    Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2);
+
+                    if (combinedBitmap!=null) {
+                        imageView.setImageBitmap(combinedBitmap);
                     }
                     else {
                         Log.d("T", "bm null!"+ String.valueOf(MainActivity.this.myframe.length));
@@ -516,11 +521,11 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Log.d("T", "image width:" + String.valueOf(imagei.width()) + " " + String.valueOf(imagei.height()));
         Log.d("T", "keypoints size: " + String.valueOf(keypoints.size()));
 
-            Mat outputImage = new Mat();
-            Scalar color = new Scalar(0, 0, 255); // BGR
-            int flags = Features2d.DRAW_RICH_KEYPOINTS; // For each keypoint, the circle around keypoint with keypoint size and orientation will be drawn.
-            Features2d.drawKeypoints(imagei, keypoints, outputImage, color , flags);
-            Utils.matToBitmap(outputImage, input);
+        Mat outputImage = new Mat();
+        Scalar color = new Scalar(0, 0, 255); // BGR
+        int flags = Features2d.DRAW_RICH_KEYPOINTS; // For each keypoint, the circle around keypoint with keypoint size and orientation will be drawn.
+        Features2d.drawKeypoints(imagei, keypoints, outputImage, color , flags);
+        Utils.matToBitmap(outputImage, input);
 
         return input;
     }
@@ -726,11 +731,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     }
 
     // Camera pose related stuff
-    public void estimatePose(Bitmap bitmap1, Bitmap bitmap2) {
+    public Bitmap estimatePose(Bitmap bitmap1, Bitmap bitmap2) {
         Mat mat1 = new Mat();
         Mat mat2 = new Mat();
         Utils.bitmapToMat(bitmap1, mat1);
         Utils.bitmapToMat(bitmap2, mat2);
+
+        // TODO: convert RGB to GRAY
 
         MatOfDMatch matches = new MatOfDMatch();
         MatOfDMatch gm = new MatOfDMatch();
@@ -786,10 +793,63 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         obj.fromList(objList);
         scene.fromList(sceneList);
 
+        Mat outputImage = new Mat();
+        Bitmap comboMap = combineImages(bitmap1, bitmap2);
+        Utils.bitmapToMat(comboMap, outputImage);
+
+        //TODO: mat1 and mat2 may need to be rgb instead of RGBA
+        Mat mat1rgb = new Mat();
+        Mat mat2rgb = new Mat();
+        Imgproc.cvtColor(mat1, mat1rgb, Imgproc.COLOR_RGBA2RGB, 1);
+        Imgproc.cvtColor(mat2, mat2rgb, Imgproc.COLOR_RGBA2RGB, 1);
+        Features2d.drawMatches(mat1rgb, keyPointsObject, mat2rgb, keyPointScene, gm, outputImage);
+
+        Bitmap bitmap = Bitmap.createBitmap(outputImage.cols(), outputImage.rows(), Bitmap.Config.ARGB_8888);
+
+        Utils.matToBitmap(outputImage, bitmap);
+
+
         Mat matH = Calib3d.findHomography(obj, scene);
         Mat warping = mat1.clone();
         org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
         Imgproc.warpPerspective(mat1, warping , matH, ims);
+
+
+        return bitmap;
+   //     mRefImg.setImageBitmap(comboBmp);
+   //     mRefImg.invalidate();
+   //     mSrcImg.setImageBitmap(bitmap);
+   //     mSrcImg.invalidate();
+
+    }
+
+    public Bitmap combineImages(Bitmap c, Bitmap s) {
+        Bitmap cs = null;
+        int width, height = 0;
+
+        if(c.getWidth() > s.getWidth()) {
+            width = c.getWidth() + s.getWidth();
+            height = c.getHeight();
+        } else {
+            width = s.getWidth() + s.getWidth();
+            height = c.getHeight();
+        }
+        cs = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas comboImage = new Canvas(cs);
+
+        comboImage.drawBitmap(c, 0f, 0f, null);
+        comboImage.drawBitmap(s, c.getWidth(), 0f, null);
+        // this is an extra bit I added, just incase you want to save the new image somewhere and then return the location
+    /*String tmpImg = String.valueOf(System.currentTimeMillis()) + ".png";
+
+    OutputStream os = null;
+    try {
+      os = new FileOutputStream(loc + tmpImg);
+      cs.compress(CompressFormat.PNG, 100, os);
+    } catch(IOException e) {
+      Log.e("combineImages", "problem combining images", e);
+    }*/
+        return cs;
     }
 
     // Beacon accurate localization method
