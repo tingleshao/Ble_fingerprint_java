@@ -69,10 +69,8 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
-import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
-import static org.opencv.imgcodecs.Imgcodecs.imread;
 
 
 public class MainActivity extends ARActivity implements SensorEventListener  {
@@ -157,6 +155,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     File myExternalFile;
     Button record;
     Spinner spinner;
+
+    // test
+    Button test;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -385,37 +386,37 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         r1up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.this.simpleRenderer.zdown();
+                MainActivity.this.simpleRenderer.rotate1(5);
             }
         });
         r1down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.this.simpleRenderer.zdown();
+                MainActivity.this.simpleRenderer.rotate1(-5);
             }
         });
         r2up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.this.simpleRenderer.zdown();
+                MainActivity.this.simpleRenderer.rotate2(5);
             }
         });
         r2down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.this.simpleRenderer.zdown();
+                MainActivity.this.simpleRenderer.rotate2(-5);
             }
         });
         r3up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.this.simpleRenderer.zdown();
+                MainActivity.this.simpleRenderer.rotate3(5);
             }
         });
         r3down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.this.simpleRenderer.zdown();
+                MainActivity.this.simpleRenderer.rotate3(-5);
             }
         });
 
@@ -447,6 +448,15 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 R.array.fingerprints_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        // test
+        test = (Button)this.findViewById(R.id.test);
+        test.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.testAnglesToM();
+            }
+        }));
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -678,9 +688,21 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
             SensorManager.getRotationMatrixFromVector(
                     mRotationMatrix, event.values);
-            rotationX = event.values[0];
-            rotationY = event.values[1];
-            rotationZ = event.values[2];
+            float currRotationX = event.values[0];
+            float currRotationY = event.values[1];
+            float currRotationZ = event.values[2];
+
+            float diffRotationX = rotationX - currRotationX;
+            float diffRotationY = rotationY - currRotationY;
+            float diffRotationZ = rotationZ - currRotationZ;
+            Log.d("T", "rotation detected!" + String.valueOf(diffRotationX) + " " + String.valueOf(diffRotationY) + " " + String.valueOf(diffRotationZ));
+            MainActivity.this.simpleRenderer.rotate1(-diffRotationX*50.0f);
+            MainActivity.this.simpleRenderer.rotate2(-diffRotationY*50.0f);
+            MainActivity.this.simpleRenderer.rotate3(-diffRotationZ*50.0f);
+
+            rotationX = currRotationX;
+            rotationY = currRotationY;
+            rotationZ = currRotationZ;
 
             rotationMsg.setText("rotation x: " + String.valueOf(rotationX) + "\n y: " +
                     String.valueOf(rotationY) + "\n z: " + String.valueOf(rotationZ));

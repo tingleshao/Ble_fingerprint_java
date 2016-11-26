@@ -35,8 +35,11 @@ public class MyCaptureCameraPreview extends CaptureCameraPreview {
      * @param activity
      * @param cel      CameraEventListener to use. Can be null.
      */
+    int width, height, format;
+    byte[] data;
     public MyCaptureCameraPreview(Activity activity, CameraEventListener cel) {
         super(activity, cel);
+
     }
 
     private Bitmap bitmap;
@@ -45,24 +48,12 @@ public class MyCaptureCameraPreview extends CaptureCameraPreview {
     public void onPreviewFrame (byte[] data, Camera camera) {
         super.onPreviewFrame(data, camera);
         Camera.Parameters parameters = camera.getParameters();
-        int width = parameters.getPreviewSize().width;
-        int height = parameters.getPreviewSize().height;
+        // TODO: the code below is slowing down the application, need to be set as a pull strategy
 
-        YuvImage yuv = new YuvImage(data, parameters.getPreviewFormat(), width, height, null);
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
-
-        byte[] bytes = out.toByteArray();
-        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-
-    //    Bitmap bitmap = Bitmap.createBitmap(r.width(), r.height(), Bitmap.Config.ARGB_8888);
-      //  Allocation bmData = renderScriptNV21ToRGBA888(
-//                mContext,
-//                r.width(),
-//                r.height(),
-//                data);
-//        bmData.copyTo(bitmap);
+        this.width = parameters.getPreviewSize().width;
+        this.height = parameters.getPreviewSize().height;
+        this.format = parameters.getPreviewFormat();
+        this.data = data;
     }
 
     public Allocation renderScriptNV21ToRGBA888(Context context, int width, int height, byte[] nv21) {
@@ -83,6 +74,20 @@ public class MyCaptureCameraPreview extends CaptureCameraPreview {
     }
 
     public Bitmap getBitmap() {
+        YuvImage yuv = new YuvImage(data, format, width, height, null);
+//
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+        byte[] bytes = out.toByteArray();
+        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+        //    Bitmap bitmap = Bitmap.createBitmap(r.width(), r.height(), Bitmap.Config.ARGB_8888);
+        //  Allocation bmData = renderScriptNV21ToRGBA888(
+//                mContext,
+//                r.width(),
+//                r.height(),
+//                data);
+//        bmData.copyTo(bitmap);
         return this.bitmap;
     }
 }

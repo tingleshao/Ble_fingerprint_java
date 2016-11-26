@@ -250,4 +250,13 @@
         android:layout_toEndOf="@+id/gl_layout"
         android:layout_marginTop="20dp" />
 
+    <Button
+        android:text="test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/mainLayout2"
+        android:layout_alignEnd="@+id/gl_layout"
+        android:layout_marginEnd="11dp"
+        android:id="@+id/test" />
+
 </RelativeLayout>
