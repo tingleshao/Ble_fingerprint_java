@@ -10,3 +10,8 @@
 .externalNativeBuild
 *.so
 
+base/
+gradle/
+gradlew
+gradlew.bat
+openCVLibrary310/

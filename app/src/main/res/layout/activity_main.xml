@@ -236,19 +236,20 @@
 
     <Button
         android:text="record"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button9"
-        android:layout_toEndOf="@+id/gl_layout"
-        android:id="@+id/record" />
+        android:id="@+id/record"
+        android:layout_height="30dp"
+        android:layout_width="60dp"
+        android:textSize="5sp"
+        android:layout_marginLeft="380dp"
+        android:layout_marginTop="50dp" />
 
     <Spinner
-        android:layout_width="70dp"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:id="@+id/spinner"
         android:layout_below="@+id/beacon6"
         android:layout_toEndOf="@+id/gl_layout"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="50dp"
+        android:layout_width="150dp" />
 
     <Button
         android:text="test"
@@ -258,5 +259,14 @@
         android:layout_alignEnd="@+id/gl_layout"
         android:layout_marginEnd="11dp"
         android:id="@+id/test" />
+
+    <Button
+        android:text="read"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:id="@+id/read"
+        android:layout_marginLeft="380dp"
+        android:layout_marginTop="120dp"
+        android:textSize="5sp" />
 
 </RelativeLayout>

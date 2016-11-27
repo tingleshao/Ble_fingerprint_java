@@ -36,11 +36,16 @@ import org.artoolkit.ar.base.ARActivity;
 import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -158,9 +163,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     File myExternalFile;
     Button record;
     Spinner spinner;
+    Button read;
+
 
     // test
     Button test;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -435,9 +444,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 try {
                     FileOutputStream fos = new FileOutputStream(myExternalFile);
-                    ArrayList<Integer> fingerprint = MainActivity.getCurrentFingerPrint();
-                    //TODO: generate message to store
-                    fos.write("foo".getBytes());
+                    ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
+                    String entry = MainActivity.this.generateEntry(fingerprint);
+                    fos.write(entry.getBytes());
                     fos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -456,6 +465,14 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 R.array.fingerprints_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        read = (Button)this.findViewById(R.id.read);
+        record.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("T", "database: " + MainActivity.this.readFingerPrintDatabase());
+            }
+        }));
 
         // test
         test = (Button)this.findViewById(R.id.test);
@@ -489,7 +506,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     private static Mat readInputStreamIntoMat(InputStream inputStream) throws IOException {
         // Read into byte-array
         byte[] temporaryImageInMemory = readStream(inputStream);
-
         // Decode into mat. Use any IMREAD_ option that describes your image appropriately
         Mat outputImage = imdecode(new MatOfByte(temporaryImageInMemory), IMREAD_GRAYSCALE);
 
@@ -809,19 +825,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         Utils.matToBitmap(outputImage, bitmap);
 
-
+        // TODO: old code here... not sure how to use it.
         Mat matH = Calib3d.findHomography(obj, scene);
         Mat warping = mat1.clone();
         org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
         Imgproc.warpPerspective(mat1, warping , matH, ims);
 
-
         return bitmap;
-   //     mRefImg.setImageBitmap(comboBmp);
-   //     mRefImg.invalidate();
-   //     mSrcImg.setImageBitmap(bitmap);
-   //     mSrcImg.invalidate();
-
     }
 
     public Bitmap combineImages(Bitmap c, Bitmap s) {
@@ -840,16 +850,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         comboImage.drawBitmap(c, 0f, 0f, null);
         comboImage.drawBitmap(s, c.getWidth(), 0f, null);
-        // this is an extra bit I added, just incase you want to save the new image somewhere and then return the location
-    /*String tmpImg = String.valueOf(System.currentTimeMillis()) + ".png";
-
-    OutputStream os = null;
-    try {
-      os = new FileOutputStream(loc + tmpImg);
-      cs.compress(CompressFormat.PNG, 100, os);
-    } catch(IOException e) {
-      Log.e("combineImages", "problem combining images", e);
-    }*/
         return cs;
     }
 
@@ -879,8 +879,85 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         return false;
     }
 
-    private static ArrayList<Integer> getCurrentFingerPrint() {
-        return null;
+    private ArrayList<Integer> getCurrentFingerPrint() {
+        ArrayList<Integer> currentFingerPrint = new ArrayList<>();
+        if (beacon0.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon0.getText().toString().split(" ")[1]);
+            currentFingerPrint.add(rssi);
+        }
+        if (beacon1.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon1.getText().toString().split(" ")[1]);
+            currentFingerPrint.add(rssi);
+        }
+        if (beacon2.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon2.getText().toString().split(" ")[1]);
+            currentFingerPrint.get(rssi);
+        }
+        if (beacon3.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon3.getText().toString().split(" ")[1]);
+            currentFingerPrint.get(rssi);
+        }
+        if (beacon4.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon4.getText().toString().split(" ")[1]);
+            currentFingerPrint.get(rssi);
+        }
+        if (beacon5.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon5.getText().toString().split(" ")[1]);
+            currentFingerPrint.get(rssi);
+        }
+        if (beacon6.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon6.getText().toString().split(" ")[1]);
+            currentFingerPrint.get(rssi);
+        }
+        if (beacon7.getText() == "TextView") {
+            currentFingerPrint.add(-100);
+        } else {
+            Integer rssi = Integer.parseInt(beacon7.getText().toString().split(" ")[1]);
+            currentFingerPrint.get(rssi);
+        }
+        return currentFingerPrint;
+    }
+
+    public String generateEntry(ArrayList<Integer> fingerprint) {
+        String location = this.spinner.getSelectedItem().toString();
+        String entry = location;
+        for (Integer item : fingerprint) {
+            entry = entry + " " + String.valueOf(item);
+        }
+        entry = entry + "\n";
+        return entry;
+    }
+
+    public String readFingerPrintDatabase() {
+        String myData = "";
+        try {
+            FileInputStream fis = new FileInputStream(myExternalFile);
+            DataInputStream in = new DataInputStream(fis);
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            while ((strLine = br.readLine()) != null) {
+                myData = myData + strLine;
+            }
+            in.close();
+        } catch (IOException e) {
+            Log.e("T", "reading fingerprint data error: " + e.getMessage());
+        }
+        return myData;
     }
 
     public void updateUsingKalmanFilter() {
