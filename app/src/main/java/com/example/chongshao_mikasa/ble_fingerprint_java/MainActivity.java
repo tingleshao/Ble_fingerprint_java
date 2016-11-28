@@ -77,6 +77,8 @@ import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.KalmanFilter;
 
+import static org.opencv.core.Core.norm;
+import static org.opencv.core.Core.normalize;
 import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 
@@ -165,11 +167,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     Spinner spinner;
     Button read;
 
+    // camera post estimation
+    private Mat currCameraPoseFromCam;
+    private Mat currCameraPoseFromBeacon;
+    private Mat currCameraPostFromIMU; //TODO: update the unit
 
     // test
     Button test;
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -443,7 +447,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             @Override
             public void onClick(View v) {
                 try {
-                    FileOutputStream fos = new FileOutputStream(myExternalFile);
+                    FileOutputStream fos = new FileOutputStream(myExternalFile, true);
                     ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
                     String entry = MainActivity.this.generateEntry(fingerprint);
                     fos.write(entry.getBytes());
@@ -467,7 +471,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         spinner.setAdapter(adapter);
 
         read = (Button)this.findViewById(R.id.read);
-        record.setOnClickListener((new View.OnClickListener() {
+        read.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("T", "database: " + MainActivity.this.readFingerPrintDatabase());
@@ -719,7 +723,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             float diffRotationX = rotationX - currRotationX;
             float diffRotationY = rotationY - currRotationY;
             float diffRotationZ = rotationZ - currRotationZ;
-            Log.d("T", "rotation detected!" + String.valueOf(diffRotationX) + " " + String.valueOf(diffRotationY) + " " + String.valueOf(diffRotationZ));
+       //     Log.d("T", "rotation detected!" + String.valueOf(diffRotationX) + " " + String.valueOf(diffRotationY) + " " + String.valueOf(diffRotationZ));
             MainActivity.this.simpleRenderer.rotate1(-diffRotationX*50.0f);
             MainActivity.this.simpleRenderer.rotate2(-diffRotationY*50.0f);
             MainActivity.this.simpleRenderer.rotate3(-diffRotationZ*50.0f);
@@ -827,12 +831,43 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         // TODO: old code here... not sure how to use it.
         Mat matH = Calib3d.findHomography(obj, scene);
-        Mat warping = mat1.clone();
-        org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
-        Imgproc.warpPerspective(mat1, warping , matH, ims);
+        updateCameraPoseEstimation(matH);
+
+   //     Mat warping = mat1.clone();
+   //     org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
+   //     Imgproc.warpPerspective(mat1, warping , matH, ims);
 
         return bitmap;
     }
+
+    public void updateCameraPoseEstimation(Mat matH) {
+        // TODO: check here if the pointer approach is working
+        Mat pose = Mat.eye(3, 4, CvType.CV_32FC1);
+        float norm1 = (float)norm(matH.col(0));
+        float norm2 = (float)norm(matH.col(1));
+        float tnorm = (norm1 + norm2) / 2.0f;
+
+        Mat p1 = matH.col(0);
+        Mat p2 = pose.col(0);
+        normalize(p1, p2);
+
+        p1 = matH.col(1);
+        p2 = pose.col(2);
+        normalize(p1, p2);
+
+        p1 = pose.col(0);
+        p2 = pose.col(1);
+
+        Mat p3 = p1.cross(p2);
+        Mat c2 = pose.col(2);
+
+        p3.copyTo(c2);
+        Core.divide(matH.col(2), new Scalar(tnorm), p3);
+        c2 = pose.col(3);
+        p3.copyTo(c2);
+        currCameraPoseFromCam = pose;
+    }
+
 
     public Bitmap combineImages(Bitmap c, Bitmap s) {
         Bitmap cs = null;
@@ -851,12 +886,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         comboImage.drawBitmap(c, 0f, 0f, null);
         comboImage.drawBitmap(s, c.getWidth(), 0f, null);
         return cs;
-    }
-
-    // Beacon accurate localization method
-    // Save the fingerprint
-    public void saveFingerprint(String location, ArrayList<Integer> fingerprint) {
-
     }
 
     public String matchFinterprint(Integer fingerprint) {
@@ -881,49 +910,49 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     private ArrayList<Integer> getCurrentFingerPrint() {
         ArrayList<Integer> currentFingerPrint = new ArrayList<>();
-        if (beacon0.getText() == "TextView") {
+        if (beacon0.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon0.getText().toString().split(" ")[1]);
             currentFingerPrint.add(rssi);
         }
-        if (beacon1.getText() == "TextView") {
+        if (beacon1.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon1.getText().toString().split(" ")[1]);
             currentFingerPrint.add(rssi);
         }
-        if (beacon2.getText() == "TextView") {
+        if (beacon2.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon2.getText().toString().split(" ")[1]);
             currentFingerPrint.get(rssi);
         }
-        if (beacon3.getText() == "TextView") {
+        if (beacon3.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon3.getText().toString().split(" ")[1]);
             currentFingerPrint.get(rssi);
         }
-        if (beacon4.getText() == "TextView") {
+        if (beacon4.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon4.getText().toString().split(" ")[1]);
             currentFingerPrint.get(rssi);
         }
-        if (beacon5.getText() == "TextView") {
+        if (beacon5.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon5.getText().toString().split(" ")[1]);
             currentFingerPrint.get(rssi);
         }
-        if (beacon6.getText() == "TextView") {
+        if (beacon6.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon6.getText().toString().split(" ")[1]);
             currentFingerPrint.get(rssi);
         }
-        if (beacon7.getText() == "TextView") {
+        if (beacon7.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon7.getText().toString().split(" ")[1]);
@@ -961,6 +990,105 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     }
 
     public void updateUsingKalmanFilter() {
-        KalmanFilter kalman = new KalmanFilter(4, 2, 0, CvType.CV_32F);
+        KalmanFilter kf = new KalmanFilter(18, 6, 0, CvType.CV_32F);
+      //  kalman.set
+        int nStates= 18;
+        int nMeasurements = 6;
+        int nInputs = 0;
+        // double dt = 0.125;
+
+        //kf.set_processNoiseCov(); // TODO
+       // kf.set_measurementNoiseCov(); // TODO
+       // kf.set_errorCovPost(); // TODO
+
+//        KF.transitionMatrix.at<double>(0,3) = dt;
+//        KF.transitionMatrix.at<double>(1,4) = dt;
+//        KF.transitionMatrix.at<double>(2,5) = dt;
+//        KF.transitionMatrix.at<double>(3,6) = dt;
+//        KF.transitionMatrix.at<double>(4,7) = dt;
+//        KF.transitionMatrix.at<double>(5,8) = dt;
+//        KF.transitionMatrix.at<double>(0,6) = 0.5*pow(dt,2);
+//        KF.transitionMatrix.at<double>(1,7) = 0.5*pow(dt,2);
+//        KF.transitionMatrix.at<double>(2,8) = 0.5*pow(dt,2);
+//        // orientation
+//        KF.transitionMatrix.at<double>(9,12) = dt;
+//        KF.transitionMatrix.at<double>(10,13) = dt;
+//        KF.transitionMatrix.at<double>(11,14) = dt;
+//        KF.transitionMatrix.at<double>(12,15) = dt;
+//        KF.transitionMatrix.at<double>(13,16) = dt;
+//        KF.transitionMatrix.at<double>(14,17) = dt;
+//        KF.transitionMatrix.at<double>(9,15) = 0.5*pow(dt,2);
+//        KF.transitionMatrix.at<double>(10,16) = 0.5*pow(dt,2);
+//        KF.transitionMatrix.at<double>(11,17) = 0.5*pow(dt,2);
+//       /* MEASUREMENT MODEL */
+//        //  [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+//        //  [0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+//        //  [0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+//        //  [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
+//        //  [0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0]
+//        //  [0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+//        KF.measurementMatrix.at<double>(0,0) = 1;  // x
+//        KF.measurementMatrix.at<double>(1,1) = 1;  // y
+//        KF.measurementMatrix.at<double>(2,2) = 1;  // z
+//        KF.measurementMatrix.at<double>(3,9) = 1;  // roll
+//        KF.measurementMatrix.at<double>(4,10) = 1; // pitch
+//        KF.measurementMatrix.at<double>(5,11) = 1; // yaw
+
+
+        // GOOD Measurement
+//        if( inliers_idx.rows >= minInliersKalman )
+//        {
+//            // Get the measured translation
+//            cv::Mat translation_measured(3, 1, CV_64F);
+//            translation_measured = pnp_detection.get_t_matrix();
+//            // Get the measured rotation
+//            cv::Mat rotation_measured(3, 3, CV_64F);
+//            rotation_measured = pnp_detection.get_R_matrix();
+//            // fill the measurements vector
+//            fillMeasurements(measurements, translation_measured, rotation_measured);
+//        }
+//// Instantiate estimated translation and rotation
+//        cv::Mat translation_estimated(3, 1, CV_64F);
+//        cv::Mat rotation_estimated(3, 3, CV_64F);
+//// update the Kalman filter with good measurements
+//        updateKalmanFilter( KF, measurements,
+//                translation_estimated, rotation_estimated);
+
+        //TODO: fill measurements
+//        void fillMeasurements( cv::Mat &measurements,
+//        const cv::Mat &translation_measured, const cv::Mat &rotation_measured)
+//        {
+//            // Convert rotation matrix to euler angles
+//            cv::Mat measured_eulers(3, 1, CV_64F);
+//            measured_eulers = rot2euler(rotation_measured);
+//            // Set measurement to predict
+//            measurements.at<double>(0) = translation_measured.at<double>(0); // x
+//            measurements.at<double>(1) = translation_measured.at<double>(1); // y
+//            measurements.at<double>(2) = translation_measured.at<double>(2); // z
+//            measurements.at<double>(3) = measured_eulers.at<double>(0);      // roll
+//            measurements.at<double>(4) = measured_eulers.at<double>(1);      // pitch
+//            measurements.at<double>(5) = measured_eulers.at<double>(2);      // yaw
+//        }
+
+        // TODO: update kalman filter
+//        void updateKalmanFilter( cv::KalmanFilter &KF, cv::Mat &measurement,
+//                cv::Mat &translation_estimated, cv::Mat &rotation_estimated )
+//        {
+//            // First predict, to update the internal statePre variable
+//            cv::Mat prediction = KF.predict();
+//            // The "correct" phase that is going to use the predicted value and our measurement
+//            cv::Mat estimated = KF.correct(measurement);
+//            // Estimated translation
+//            translation_estimated.at<double>(0) = estimated.at<double>(0);
+//            translation_estimated.at<double>(1) = estimated.at<double>(1);
+//            translation_estimated.at<double>(2) = estimated.at<double>(2);
+//            // Estimated euler angles
+//            cv::Mat eulers_estimated(3, 1, CV_64F);
+//            eulers_estimated.at<double>(0) = estimated.at<double>(9);
+//            eulers_estimated.at<double>(1) = estimated.at<double>(10);
+//            eulers_estimated.at<double>(2) = estimated.at<double>(11);
+//            // Convert estimated quaternion to rotation matrix
+//            rotation_estimated = euler2rot(eulers_estimated);
+//        }
     }
 }
