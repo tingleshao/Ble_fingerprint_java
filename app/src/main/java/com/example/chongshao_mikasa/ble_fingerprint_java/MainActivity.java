@@ -926,48 +926,48 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon2.getText().toString().split(" ")[1]);
-            currentFingerPrint.get(rssi);
+            currentFingerPrint.add(rssi);
         }
         if (beacon3.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon3.getText().toString().split(" ")[1]);
-            currentFingerPrint.get(rssi);
+            currentFingerPrint.add(rssi);
         }
         if (beacon4.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon4.getText().toString().split(" ")[1]);
-            currentFingerPrint.get(rssi);
+            currentFingerPrint.add(rssi);
         }
         if (beacon5.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon5.getText().toString().split(" ")[1]);
-            currentFingerPrint.get(rssi);
+            currentFingerPrint.add(rssi);
         }
         if (beacon6.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon6.getText().toString().split(" ")[1]);
-            currentFingerPrint.get(rssi);
+            currentFingerPrint.add(rssi);
         }
         if (beacon7.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
             Integer rssi = Integer.parseInt(beacon7.getText().toString().split(" ")[1]);
-            currentFingerPrint.get(rssi);
+            currentFingerPrint.add(rssi);
         }
         return currentFingerPrint;
     }
 
     public String generateEntry(ArrayList<Integer> fingerprint) {
         String location = this.spinner.getSelectedItem().toString();
-        String entry = location;
+        String entry = "L"+location;
         for (Integer item : fingerprint) {
             entry = entry + " " + String.valueOf(item);
         }
-        entry = entry + "\n";
+        entry = entry + "#";
         return entry;
     }
 
