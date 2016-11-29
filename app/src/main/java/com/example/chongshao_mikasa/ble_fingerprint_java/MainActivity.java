@@ -76,6 +76,7 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.KalmanFilter;
+import org.w3c.dom.Text;
 
 import static org.opencv.core.Core.norm;
 import static org.opencv.core.Core.normalize;
@@ -293,8 +294,14 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     // match fingerprint
     Button match;
 
+    // display current status
+    TextView beaconLocation;
+    TextView imuAngle;
+    TextView camLocationAngle;
+
     // test
     Button test;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -605,8 +612,16 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             @Override
             public void onClick(View v) {
                 Log.d("T", "match:");
+                ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
+                String location = MainActivity.this.matchFingerprint((Integer[])fingerprint.toArray());
+                MainActivity.this.beaconLocation.setText("location: " + location);
             }
         }));
+
+        // display current status
+        beaconLocation = (TextView)this.findViewById(R.id.beaconPosition);
+        imuAngle = (TextView)this.findViewById(R.id.imuAngle);
+        camLocationAngle = (TextView)this.findViewById(R.id.camAnglePosition);
 
         // test
         test = (Button)this.findViewById(R.id.test);
@@ -996,6 +1011,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         c2 = pose.col(3);
         p3.copyTo(c2);
         currCameraPoseFromCam = pose;
+        this.camLocationAngle.setText(currCameraPoseFromBeacon.toString());
     }
 
 

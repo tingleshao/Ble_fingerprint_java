@@ -278,4 +278,28 @@
         android:layout_marginLeft="380dp"
         android:layout_marginTop="150dp" />
 
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mainLayout"
+        android:layout_alignEnd="@+id/match"
+        android:id="@+id/beaconPosition" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button12"
+        android:layout_alignStart="@+id/beaconPosition"
+        android:id="@+id/imuAngle" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imuAngle"
+        android:layout_alignStart="@+id/imuAngle"
+        android:id="@+id/camAnglePosition" />
+
 </RelativeLayout>
