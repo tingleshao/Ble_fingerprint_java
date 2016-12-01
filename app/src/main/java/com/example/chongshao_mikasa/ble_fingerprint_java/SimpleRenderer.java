@@ -96,7 +96,22 @@ public class SimpleRenderer extends ARRenderer  {
         angle2 = radToDegree(angles[1]);
         angle3 = radToDegree(angles[2]);
         Log.d("T", "angles: " + String.valueOf(angle1) + " " + String.valueOf(angle2) + " " + String.valueOf(angle3));
+    }
 
+    public float[] getCameraAngles() {
+        float[] angles = mToAngles(new float[]{cameraM[0], cameraM[1], cameraM[2], cameraM[4], cameraM[5], cameraM[6], cameraM[8], cameraM[9], cameraM[10]});
+        return new float[]{angles[0] * 180.0f / (float)Math.PI, angles[1] * 180.0f / (float)Math.PI, angles[2] * 180.0f / (float)Math.PI};
+    }
+
+    public float[] getAnglesFromPoseM(Mat pose) {
+        float[] angles = mToAngles(new float[]{(float)pose.get(0,0)[0], (float)pose.get(1,0)[0], (float)pose.get(2,0)[0],
+                                               (float)pose.get(0,1)[0], (float)pose.get(1,1)[0], (float)pose.get(2,1)[0],
+                                               (float)pose.get(0,2)[0], (float)pose.get(1,2)[0], (float)pose.get(2,2)[0],});
+        return new float[]{angles[0] * 180.0f / (float)Math.PI, angles[1] * 180.0f / (float)Math.PI, angles[2] * 180.0f / (float)Math.PI};
+    }
+
+    public float[] getTranslationFromPoseM(Mat pose) { 
+        return new float[]{(float)pose.get(0,3)[0], (float)pose.get(1,3)[0], (float)pose.get(2,3)[0]};
     }
 
     public static float radToDegree(float radi) {
@@ -158,7 +173,6 @@ public class SimpleRenderer extends ARRenderer  {
     public void rotate1(float delta_angle) {
      //   this.angle1 += delta_angle;
         Matrix.rotateM(cameraM, 0, cameraM, 0, delta_angle, 1, 0, 0);
-
         updateM(true);
      //   this.displayAngles();
     }
@@ -214,7 +228,7 @@ public class SimpleRenderer extends ARRenderer  {
     public static float[] mToAngles(float[] m) {
         // TODO: here maybe the angle is inverted. Let's see
         double sy = Math.sqrt((double)(m[0] * m[0] + m[1] * m[1]));
-        Log.d("T", "sy" + String.valueOf(sy));
+     //   Log.d("T", "sy" + String.valueOf(sy));
         boolean singular = sy < 0.000001;
         double x, y, z;
         if (singular) {
@@ -227,7 +241,7 @@ public class SimpleRenderer extends ARRenderer  {
             z = Math.atan2(-m[1] , m[0]);
         }
         float[] angles = {(float)x, (float)y, (float)z};
-        Log.d("T", "in mtoangles, angles:" + String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z));
+  //      Log.d("T", "in mtoangles, angles:" + String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z));
         return angles;
     }
 
