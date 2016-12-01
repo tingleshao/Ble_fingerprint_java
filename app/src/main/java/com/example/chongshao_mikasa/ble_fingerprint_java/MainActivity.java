@@ -1139,9 +1139,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         pose.put(2,3, p3.get(2,0));
         Log.d("T", "c2, p3, pose: " + p3.dump() + " " + pose.dump());
         Log.d("T", "null checking: " + String.valueOf(currCameraPoseFromBeacon==null) + " " + String.valueOf(pose == null));
-        this.camLocationAngle.setText(pose.dump());
-        // TODO: convert the matrix to rotation / translation numbers
-
+        float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
+        float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
+        this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
+                                     + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
         return pose;
     }
 

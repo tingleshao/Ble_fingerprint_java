@@ -110,7 +110,7 @@ public class SimpleRenderer extends ARRenderer  {
         return new float[]{angles[0] * 180.0f / (float)Math.PI, angles[1] * 180.0f / (float)Math.PI, angles[2] * 180.0f / (float)Math.PI};
     }
 
-    public float[] getTranslationFromPoseM(Mat pose) { 
+    public float[] getTranslationFromPoseM(Mat pose) {
         return new float[]{(float)pose.get(0,3)[0], (float)pose.get(1,3)[0], (float)pose.get(2,3)[0]};
     }
 
