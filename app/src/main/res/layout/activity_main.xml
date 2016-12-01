@@ -123,10 +123,10 @@
     <FrameLayout
         android:id="@+id/mainLayout2"
         android:orientation="vertical"
-        android:layout_marginLeft="480dp"
+        android:layout_marginLeft="300dp"
         android:layout_height="125dp"
-        android:layout_width="125dp"
-        android:layout_marginTop="125dp" />
+        android:layout_marginTop="125dp"
+        android:layout_width="400dp" />
 
     <Button
         android:text="xup"
@@ -255,17 +255,16 @@
         android:text="test"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/mainLayout2"
-        android:layout_alignEnd="@+id/gl_layout"
-        android:layout_marginEnd="11dp"
-        android:id="@+id/test" />
+        android:id="@+id/test"
+        android:layout_marginLeft="250dp"
+        android:layout_marginTop="250dp" />
 
     <Button
         android:text="read"
         android:layout_width="60dp"
         android:layout_height="30dp"
         android:id="@+id/read"
-        android:layout_marginLeft="380dp"
+        android:layout_marginLeft="250dp"
         android:layout_marginTop="120dp"
         android:textSize="5sp" />
 
@@ -275,31 +274,34 @@
         android:layout_height="30dp"
         android:id="@+id/match"
         android:textSize="5sp"
-        android:layout_marginLeft="380dp"
+        android:layout_marginLeft="250dp"
         android:layout_marginTop="150dp" />
 
     <TextView
         android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
         android:layout_below="@+id/mainLayout"
         android:layout_alignEnd="@+id/match"
-        android:id="@+id/beaconPosition" />
+        android:id="@+id/beaconPosition"
+        android:textSize="5sp"
+        android:layout_height="20dp" />
 
     <TextView
         android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_below="@+id/button12"
         android:layout_alignStart="@+id/beaconPosition"
-        android:id="@+id/imuAngle" />
+        android:id="@+id/imuAngle"
+        android:textSize="5sp"
+        android:layout_width="60dp"
+        android:layout_height="20dp" />
 
     <TextView
         android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
         android:layout_below="@+id/imuAngle"
         android:layout_alignStart="@+id/imuAngle"
-        android:id="@+id/camAnglePosition" />
+        android:id="@+id/camAnglePosition"
+        android:textSize="5sp"
+        android:layout_height="20dp" />
 
 </RelativeLayout>
