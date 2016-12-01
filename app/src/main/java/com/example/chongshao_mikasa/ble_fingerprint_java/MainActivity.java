@@ -1286,31 +1286,34 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         int nStates= 18;
         int nMeasurements = 6;
         int nInputs = 0;
-        // double dt = 0.125;
+        double dt = 0.125;
 
         //kf.set_processNoiseCov(); // TODO
-       // kf.set_measurementNoiseCov(); // TODO
-       // kf.set_errorCovPost(); // TODO
+        // kf.set_measurementNoiseCov(); // TODO
+        // kf.set_errorCovPost(); // TODO
 
-//        KF.transitionMatrix.at<double>(0,3) = dt;
-//        KF.transitionMatrix.at<double>(1,4) = dt;
-//        KF.transitionMatrix.at<double>(2,5) = dt;
-//        KF.transitionMatrix.at<double>(3,6) = dt;
-//        KF.transitionMatrix.at<double>(4,7) = dt;
-//        KF.transitionMatrix.at<double>(5,8) = dt;
-//        KF.transitionMatrix.at<double>(0,6) = 0.5*pow(dt,2);
-//        KF.transitionMatrix.at<double>(1,7) = 0.5*pow(dt,2);
-//        KF.transitionMatrix.at<double>(2,8) = 0.5*pow(dt,2);
-//        // orientation
-//        KF.transitionMatrix.at<double>(9,12) = dt;
-//        KF.transitionMatrix.at<double>(10,13) = dt;
-//        KF.transitionMatrix.at<double>(11,14) = dt;
-//        KF.transitionMatrix.at<double>(12,15) = dt;
-//        KF.transitionMatrix.at<double>(13,16) = dt;
-//        KF.transitionMatrix.at<double>(14,17) = dt;
-//        KF.transitionMatrix.at<double>(9,15) = 0.5*pow(dt,2);
-//        KF.transitionMatrix.at<double>(10,16) = 0.5*pow(dt,2);
-//        KF.transitionMatrix.at<double>(11,17) = 0.5*pow(dt,2);
+        Mat transitionMatrix = new Mat(15, nStates, CvType.CV_64FC1);
+        transitionMatrix.put(0, 3, dt);
+        transitionMatrix.put(1, 4, dt);
+        transitionMatrix.put(2, 5, dt);
+        transitionMatrix.put(3, 6, dt);
+        transitionMatrix.put(4, 7, dt);
+        transitionMatrix.put(5, 8, dt);
+        transitionMatrix.put(0, 6, 0.5*Math.pow(dt, 2.0));
+        transitionMatrix.put(1, 7, 0.5*Math.pow(dt, 2.0));
+        transitionMatrix.put(2, 8, 0.5*Math.pow(dt, 2.0));
+        // orientation
+        transitionMatrix.put(9, 12, dt);
+        transitionMatrix.put(10, 13, dt);
+        transitionMatrix.put(11, 14, dt);
+        transitionMatrix.put(12, 15, dt);
+        transitionMatrix.put(13, 16, dt);
+        transitionMatrix.put(14, 17, dt);
+        transitionMatrix.put(9, 15, 0.5*Math.pow(dt, 2.0));
+        transitionMatrix.put(10, 16, 0.5*Math.pow(dt, 2.0));
+        transitionMatrix.put(11, 17, 0.5*Math.pow(dt, 2.0));
+
+        Mat measurementMatrix = new Mat(nMeasurements, nStates, CvType.CV_64FC1);
 //       /* MEASUREMENT MODEL */
 //        //  [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 //        //  [0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
@@ -1318,26 +1321,26 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 //        //  [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
 //        //  [0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0]
 //        //  [0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
-//        KF.measurementMatrix.at<double>(0,0) = 1;  // x
-//        KF.measurementMatrix.at<double>(1,1) = 1;  // y
-//        KF.measurementMatrix.at<double>(2,2) = 1;  // z
-//        KF.measurementMatrix.at<double>(3,9) = 1;  // roll
-//        KF.measurementMatrix.at<double>(4,10) = 1; // pitch
-//        KF.measurementMatrix.at<double>(5,11) = 1; // yaw
+        measurementMatrix.put(0, 0, 1); //x
+        measurementMatrix.put(1, 1, 1); //y
+        measurementMatrix.put(2, 2, 1); //z
+        measurementMatrix.put(3, 9, 1); //roll
+        measurementMatrix.put(4, 10, 1); //pitch
+        measurementMatrix.put(5, 11, 1); //yaw
 
+        kf.set_transitionMatrix(transitionMatrix);
+        kf.set_measurementMatrix(measurementMatrix);
 
         // GOOD Measurement
-//        if( inliers_idx.rows >= minInliersKalman )
-//        {
-//            // Get the measured translation
-//            cv::Mat translation_measured(3, 1, CV_64F);
-//            translation_measured = pnp_detection.get_t_matrix();
-//            // Get the measured rotation
-//            cv::Mat rotation_measured(3, 3, CV_64F);
-//            rotation_measured = pnp_detection.get_R_matrix();
-//            // fill the measurements vector
-//            fillMeasurements(measurements, translation_measured, rotation_measured);
-//        }
+        //if( inliers_idx.rows >= minInliersKalman ) {
+        Mat translationMeasured = new Mat(3, 1, CvType.CV_64FC1);
+        Mat rotationMeasured = new Mat(3, 3, CvType.CV_64FC1);
+        // TODO fill measurement vector
+        // fillMeasurements(measurements, translation_measured, rotation_measured);
+        // }
+
+        updateKalmanFilter(kf, measurements, translationMeasured, rotationMeasured);
+
 //// Instantiate estimated translation and rotation
 //        cv::Mat translation_estimated(3, 1, CV_64F);
 //        cv::Mat rotation_estimated(3, 3, CV_64F);
@@ -1381,5 +1384,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 //            // Convert estimated quaternion to rotation matrix
 //            rotation_estimated = euler2rot(eulers_estimated);
 //        }
+    }
+
+    public void updateKalmanFilter(KalmanFilter kf, Mat measurement, Mat translationEstimated, Mat rotationEstimated) {
+        
     }
 }
