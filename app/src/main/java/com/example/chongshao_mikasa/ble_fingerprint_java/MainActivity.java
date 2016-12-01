@@ -1338,7 +1338,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         // TODO fill measurement vector
         // fillMeasurements(measurements, translation_measured, rotation_measured);
         // }
-
+        Mat measurements = new Mat(6, 1, CvType.CV_64FC1);
         updateKalmanFilter(kf, measurements, translationMeasured, rotationMeasured);
 
 //// Instantiate estimated translation and rotation
@@ -1363,30 +1363,16 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 //            measurements.at<double>(4) = measured_eulers.at<double>(1);      // pitch
 //            measurements.at<double>(5) = measured_eulers.at<double>(2);      // yaw
 //        }
-
-        // TODO: update kalman filter
-//        void updateKalmanFilter( cv::KalmanFilter &KF, cv::Mat &measurement,
-//                cv::Mat &translation_estimated, cv::Mat &rotation_estimated )
-//        {
-//            // First predict, to update the internal statePre variable
-//            cv::Mat prediction = KF.predict();
-//            // The "correct" phase that is going to use the predicted value and our measurement
-//            cv::Mat estimated = KF.correct(measurement);
-//            // Estimated translation
-//            translation_estimated.at<double>(0) = estimated.at<double>(0);
-//            translation_estimated.at<double>(1) = estimated.at<double>(1);
-//            translation_estimated.at<double>(2) = estimated.at<double>(2);
-//            // Estimated euler angles
-//            cv::Mat eulers_estimated(3, 1, CV_64F);
-//            eulers_estimated.at<double>(0) = estimated.at<double>(9);
-//            eulers_estimated.at<double>(1) = estimated.at<double>(10);
-//            eulers_estimated.at<double>(2) = estimated.at<double>(11);
-//            // Convert estimated quaternion to rotation matrix
-//            rotation_estimated = euler2rot(eulers_estimated);
-//        }
     }
 
     public void updateKalmanFilter(KalmanFilter kf, Mat measurement, Mat translationEstimated, Mat rotationEstimated) {
-        
+        Mat prediction = kf.predict();
+        Mat estimated = kf.correct(measurement);
+        translationEstimated.put(0,0, estimated.get(0,0));
+        translationEstimated.put(1,0, estimated.get(1,0));
+        translationEstimated.put(2,0, estimated.get(2,0));
+        float[] rotationEstimatedfloat =this.simpleRenderer.anglesToM(new float[]{(float)estimated.get(3,0)[0], (float)estimated.get(4,0)[1], (float)estimated.get(5,0)[2]});
+        // TODO: float[] to Mat
+
     }
 }
