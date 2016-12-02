@@ -79,12 +79,15 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.video.KalmanFilter;
 import org.w3c.dom.Text;
 
+import static org.opencv.core.Core.max;
 import static org.opencv.core.Core.norm;
 import static org.opencv.core.Core.normalize;
 import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
 import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 import static org.opencv.imgproc.Imgproc.resize;
 
+
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 public class MainActivity extends ARActivity implements SensorEventListener  {
 
@@ -1211,6 +1214,30 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             }
         }
         return locations[minSSDid/3];
+    }
+
+    public String matchFingerprint2(ArrayList<Integer> fingerprint) {
+        double maxCorr = 0.0;
+        int maxCorrId = -1;
+        double [] fingerprintdouble = new double[8];
+        for (int i = 0; i < 8; i++) {
+            fingerprintdouble[i] = fingerprint.get(i);
+        }
+        double[] dbentrydouble = new double[8];
+
+        PearsonsCorrelation pc = new PearsonsCorrelation();
+        for (int k = 0; k < fingerprintDatabase.length; k++) {
+            int[] dbEntry = fingerprintDatabase[k];
+            for (int i = 0; i < 8; i++) {
+                dbentrydouble[i] = (double)dbEntry[i];
+            }
+            double currCorr = pc.correlation(dbentrydouble, fingerprintdouble);
+            if (currCorr > maxCorr) {
+                maxCorr = currCorr;
+                maxCorrId = k;
+            }
+        }
+        return locations[maxCorrId/3];
     }
 
     private static boolean isExternalStorageReadOnly() {
