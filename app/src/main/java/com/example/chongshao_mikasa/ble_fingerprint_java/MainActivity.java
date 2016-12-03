@@ -573,12 +573,14 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 cam = MainActivity.this.getCameraPreview();
                 if (cam != null) {
-                    Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
+            //        Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
 
                  //   Bitmap bitmap1g = toGrayscale(bitmap1);
-                    Bitmap bitmap1f = locateFeaturePoint(bitmap1);
+           //         Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
-                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample2);
+           //         Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample2);
+                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
+                    Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box_in_scene);
                     Bitmap bitmap2g = toGrayscale(bitmap2);
                     Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
 
@@ -1025,7 +1027,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Mat mat1 = new Mat();
         Mat mat2 = new Mat();
         Utils.bitmapToMat(bitmap1, mat1);
-        Size size = new Size(800,600);//the dst image size,e.g.100x100
+        Size size = new Size(504,378);//the dst image size,e.g.100x100
         Mat dst = new Mat();//dst image
         resize(mat1,dst,size);//resize image
 
@@ -1076,7 +1078,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             if( dist > maxDist ) maxDist = dist;
         }
         for(int i = 0; i < descriptorsObject.rows(); i++) {
-            if(matchesList.get(i).distance < 2 * minDist){
+            if(matchesList.get(i).distance < 2 * minDist) {
                 goodMatches.addLast(matchesList.get(i)); // get good matches
             }
         }
@@ -1089,6 +1091,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             objList.addLast(keyPointsObjectList.get(goodMatches.get(i).queryIdx).pt);
             sceneList.addLast(keyPointsSceneList.get(goodMatches.get(i).trainIdx).pt);
         }
+
 
         obj.fromList(objList);
         scene.fromList(sceneList);
@@ -1114,6 +1117,22 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
    //     org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
    //     Imgproc.warpPerspective(mat1, warping , matH, ims);
         return bitmap;
+    }
+
+    public Mat updateCameraPoseEstimation2(Mat matH) {
+        Mat K = new Mat(3,3,CvType.CV_64FC1);
+        K.put(0,0,1);
+        K.put(1,0,1);
+        K.put(2,0,1);
+        K.put(0,1,1);
+        K.put(1,1,1);
+        K.put(2,1,1);
+        K.put(0,2,1);
+        K.put(1,2,1);
+        K.put(2,2,1);
+   //     Calib3d.decomposeHomographyMat(matH, Mat K, java.util.List<Mat> rotations, java.util.List<Mat> translations, java.util.List<Mat> normals);
+//
+        return null;
     }
 
     // TODO: try a second way of estimating your matrix
@@ -1152,8 +1171,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         pose.put(1,2, p3.get(1,0));
         pose.put(2,2, p3.get(2,0));
     //    Log.d("T", "p3, pose: " + p3.dump() + " " + pose.dump());
+        tnorm = (float)norm(matH.col(2));
 
         Core.divide(matH.col(2), new Scalar(tnorm), p3);
+
    //     Log.d("T", "p3, c2, matH: " + p3.dump() + " " + matH.dump());
         pose.put(0,3, p3.get(0,0));
         pose.put(1,3, p3.get(1,0));
@@ -1184,9 +1205,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         cameraM[9] = (float)pose.get(1,2)[0];
         cameraM[10] = (float)pose.get(2,2)[0];
         cameraM[11] = 0.0f;
-        cameraM[12] = (float)pose.get(0,3)[0];
-        cameraM[13] = (float)pose.get(1,3)[0];
-        cameraM[14] = (float)pose.get(2,3)[0];
+        cameraM[12] = (float)pose.get(0,3)[0] - 74.43878f;
+        cameraM[13] = (float)pose.get(1,3)[0] - 54.322666f;
+        cameraM[14] = (float)pose.get(2,3)[0] + 276.38602f;
         cameraM[15] = 1.0f;
         return cameraM;
     }
