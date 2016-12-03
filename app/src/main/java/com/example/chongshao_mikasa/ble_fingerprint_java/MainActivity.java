@@ -558,7 +558,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         mRotationVectorSensor = mSensorManager.getDefaultSensor(
                 Sensor.TYPE_ROTATION_VECTOR);
         mAccelerationSensor = mSensorManager.getDefaultSensor(
-                Sensor.TYPE_ACCELEROMETER);
+                Sensor.TYPE_LINEAR_ACCELERATION);
 
         mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
         mSensorManager.registerListener(this, mAccelerationSensor, 5000);
@@ -579,8 +579,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
            //         Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
            //         Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample2);
-                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
-                    Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box_in_scene);
+                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.box_in_scene);
+                    Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
                     Bitmap bitmap2g = toGrayscale(bitmap2);
                     Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
 
@@ -967,18 +967,27 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
   //      Log.d("T", "sensor changed!");
         // we received a sensor event. it is a good practice to check
         // that we received the proper event
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            mAccelerometerMatrix[0] = event.values[0];
-            mAccelerometerMatrix[1] = event.values[1];
-            mAccelerometerMatrix[2] = event.values[2];
-            mAccelerometerMatrix[3] = 0;
+        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+
+            float currAccelX = event.values[0];
+            float currAccelY = event.values[1];
+            float currAccelZ = event.values[2];
+
+           // mAccelerometerMatrix[0] = event.values[0];
+           // mAccelerometerMatrix[1] = event.values[1];
+           // mAccelerometerMatrix[2] = event.values[2];
+           // mAccelerometerMatrix[3] = 0;
+            if (useIMU) {
+                MainActivity.this.simpleRenderer.translate1(currAccelX * currAccelX * 0.1f);
+                MainActivity.this.simpleRenderer.translate2(currAccelY * currAccelY * 0.1f);
+                MainActivity.this.simpleRenderer.translate3(currAccelZ * currAccelZ * 0.1f);
         }
 
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
             // convert the rotation-vector to a 4x4 matrix. the matrix
             // is interpreted by Open GL as the inverse of the
             // rotation-vector, which is what we want.
-
+            // TODO: use this rotation matrix
             SensorManager.getRotationMatrixFromVector(
                     mRotationMatrix, event.values);
             float currRotationX = event.values[0];
@@ -988,7 +997,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             float diffRotationX = rotationX - currRotationX;
             float diffRotationY = rotationY - currRotationY;
             float diffRotationZ = rotationZ - currRotationZ;
-       //     Log.d("T", "rotation detected!" + String.valueOf(diffRotationX) + " " + String.valueOf(diffRotationY) + " " + String.valueOf(diffRotationZ));
             if (useIMU) {
                 MainActivity.this.simpleRenderer.rotate1(diffRotationY * 145.0f);
                 MainActivity.this.simpleRenderer.rotate2(-diffRotationX * 145.0f);
@@ -1032,7 +1040,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         resize(mat1,dst,size);//resize image
 
         Utils.bitmapToMat(bitmap2, mat2);
-        Log.d("T", "bitmap1 size: " + String.valueOf(bitmap1.getHeight()) + " " + String.valueOf(bitmap1.getWidth()) );
+        resize(mat2,dst,size);//resize image
+
+///        Log.d("T", "bitmap1 size: " + String.valueOf(bitmap1.getHeight()) + " " + String.valueOf(bitmap1.getWidth()) );
 
         MatOfDMatch matches = new MatOfDMatch();
         MatOfDMatch gm = new MatOfDMatch();
@@ -1111,7 +1121,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Utils.matToBitmap(outputImage, bitmap);
 
         Mat matH = Calib3d.findHomography(obj, scene);
-        this.currCameraPoseFromCam = updateCameraPoseEstimation(matH);
+        this.currCameraPoseFromCam = updateCameraPoseEstimation2(matH);
 
    //     Mat warping = mat1.clone();
    //     org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
@@ -1121,18 +1131,48 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     public Mat updateCameraPoseEstimation2(Mat matH) {
         Mat K = new Mat(3,3,CvType.CV_64FC1);
-        K.put(0,0,1);
-        K.put(1,0,1);
-        K.put(2,0,1);
-        K.put(0,1,1);
-        K.put(1,1,1);
-        K.put(2,1,1);
-        K.put(0,2,1);
-        K.put(1,2,1);
-        K.put(2,2,1);
-   //     Calib3d.decomposeHomographyMat(matH, Mat K, java.util.List<Mat> rotations, java.util.List<Mat> translations, java.util.List<Mat> normals);
-//
-        return null;
+
+        K.put(0,0,3.97f);
+        K.put(1,0,0.0f);
+        K.put(2,0,0.0f);
+        K.put(0,1,0.0f);
+        K.put(1,1,3.97f);
+        K.put(2,1,0.0f);
+        K.put(0,2,252.0f);
+        K.put(1,2,189.0f);
+        K.put(2,2,1.0f);
+
+        ArrayList<Mat> rotations = new ArrayList<Mat>();
+        ArrayList<Mat> translations = new ArrayList<Mat>();
+        ArrayList<Mat> normals = new ArrayList<Mat>();
+
+        Calib3d.decomposeHomographyMat(matH, K, rotations, translations,  normals);
+        Mat pose = Mat.eye(3, 4, CvType.CV_32FC1);
+        Mat rotation1 = rotations.get(0);
+        Mat translation1 = translations.get(0);
+        Log.d("T", "number of solutions: " + String.valueOf(rotations.size()));
+        //Log.d("T", "rotation / translation size: " + String.valueOf(rotation0.rows()) + "x" + String.valueOf(rotation0.cols()) + " " +
+        //        String.valueOf(translation0.rows()) + "x" + String.valueOf(translation0.cols()));
+        pose.put(0,0, rotation1.get(0,0));
+        pose.put(1,0, rotation1.get(1,0));
+        pose.put(2,0, rotation1.get(2,0));
+        pose.put(0,1, rotation1.get(0,1));
+        pose.put(1,1, rotation1.get(1,1));
+        pose.put(2,1, rotation1.get(2,1));
+        pose.put(0,2, rotation1.get(0,2));
+        pose.put(1,2, rotation1.get(1,2));
+        pose.put(2,2, rotation1.get(2,2));
+        pose.put(0,3, translation1.get(0,0));
+        pose.put(1,3, translation1.get(1,0));
+        pose.put(2,3, translation1.get(2,0));
+        float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
+        float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
+        this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
+                + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
+
+        this.simpleRenderer.cameraM = poseToCameraM(pose);
+        this.simpleRenderer.updateM(false);
+        return pose;
     }
 
     // TODO: try a second way of estimating your matrix
@@ -1205,9 +1245,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         cameraM[9] = (float)pose.get(1,2)[0];
         cameraM[10] = (float)pose.get(2,2)[0];
         cameraM[11] = 0.0f;
-        cameraM[12] = (float)pose.get(0,3)[0] - 74.43878f;
-        cameraM[13] = (float)pose.get(1,3)[0] - 54.322666f;
-        cameraM[14] = (float)pose.get(2,3)[0] + 276.38602f;
+        cameraM[12] = (float)pose.get(0,3)[0]/100.f - 74.43878f;
+        cameraM[13] = (float)pose.get(1,3)[0]/100.f - 54.322666f;
+        cameraM[14] = (float)pose.get(2,3)[0]/100.f + 276.38602f;
         cameraM[15] = 1.0f;
         return cameraM;
     }

@@ -6,6 +6,7 @@ import android.util.Log;
 import org.artoolkit.ar.base.ARToolKit;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.artoolkit.ar.base.rendering.Arrow;
+import org.artoolkit.ar.base.rendering.Cube;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -22,7 +23,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
-    private Arrow cube = new Arrow(40.0f, 0.0f, 0.0f, 20.0f);
+    private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
     private float angle = 0.0f;
     private boolean spinning = false;
     private int drawCount = 0;
@@ -188,18 +189,23 @@ public class SimpleRenderer extends ARRenderer  {
     //    this.angle3 += delta_angle;
         Matrix.rotateM(cameraM, 0, cameraM, 0, delta_angle, 0, 0, 1);
         updateM(true);
-    //    float[] rotateM = new float[9];
-    //    rotateM[0] = m[0];
-    //    rotateM[1] = m[1];
-    //    rotateM[2] = m[2];
-    //    rotateM[3] = m[4];
-    //    rotateM[4] = m[5];
-    //    rotateM[5] = m[6];
-    //    rotateM[6] = m[8];
-    //    rotateM[7] = m[9];
-    //    rotateM[8] = m[10];
-    //    this.displayAngles();
     }
+
+    public void translate1(float delta_d) {
+        Matrix.translateM(cameraM, 0, cameraM, 0, delta_d, 0, 0);
+        updateM(true);
+    }
+
+    public void translate2(float delta_d) {
+        Matrix.translateM(cameraM, 0, cameraM, 0, 0, delta_d, 0);
+        updateM(true);
+    }
+
+    public void translate3(float delta_d) {
+        Matrix.translateM(cameraM, 0, cameraM, 0, 0, 0, delta_d);
+        updateM(true);
+    }
+
 
     public void updateM(boolean updateRotation) {
         // TODO: from camera M, update m
