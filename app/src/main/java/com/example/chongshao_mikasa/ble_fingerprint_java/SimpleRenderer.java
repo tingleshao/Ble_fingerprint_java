@@ -331,15 +331,15 @@ public class SimpleRenderer extends ARRenderer  {
         //   if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
         //     float[] m = ARToolKit.getInstance().queryMarkerTransformation(markerID);
 
-        float xangle;
-        if (beaconAngle.get(activity.getClosestUUID()) == null) {
-            xangle = 0.0f;
-        }
-        else {
-            xangle = (float)beaconAngle.get(activity.getClosestUUID());
-        }
+    //    float xangle;
+    //    if (beaconAngle.get(activity.getClosestUUID()) == null) {
+    //        xangle = 0.0f;
+    //    }
+    //    else {
+    //        xangle = (float)beaconAngle.get(activity.getClosestUUID());
+    //    }
 
-        Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
+    //    Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
 
         gl.glLoadMatrixf(m, 0);
         gl.glPushMatrix();

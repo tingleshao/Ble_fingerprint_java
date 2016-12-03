@@ -416,6 +416,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     // test
     Button test;
 
+    // control variable
+    boolean useIMU;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -576,7 +578,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                  //   Bitmap bitmap1g = toGrayscale(bitmap1);
                     Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
-                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample1);
+                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample2);
                     Bitmap bitmap2g = toGrayscale(bitmap2);
                     Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
 
@@ -727,7 +729,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 Log.d("T", "match:");
                 ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
-                String location = MainActivity.this.matchFingerprint(fingerprint);
+                String location = MainActivity.this.matchFingerprint2(fingerprint);
                 MainActivity.this.beaconLocation.setText("location: " + location);
             }
         }));
@@ -745,6 +747,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 MainActivity.this.simpleRenderer.testAnglesToM();
             }
         }));
+        useIMU = false;
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -839,7 +842,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 largeRssi = beaconDistance.get(String.valueOf(i));
             }
         }
-        this.closestUUID = beaconUUID.get(largeId);
+     //   this.closestUUID = beaconUUID.get(largeId);
+        this.closestUUID = largeId;
         return;
     }
 
@@ -983,10 +987,11 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             float diffRotationY = rotationY - currRotationY;
             float diffRotationZ = rotationZ - currRotationZ;
        //     Log.d("T", "rotation detected!" + String.valueOf(diffRotationX) + " " + String.valueOf(diffRotationY) + " " + String.valueOf(diffRotationZ));
-            MainActivity.this.simpleRenderer.rotate1(diffRotationY*145.0f);
-            MainActivity.this.simpleRenderer.rotate2(-diffRotationX*145.0f);
-            MainActivity.this.simpleRenderer.rotate3(-diffRotationZ*145.0f);
-
+            if (useIMU) {
+                MainActivity.this.simpleRenderer.rotate1(diffRotationY * 145.0f);
+                MainActivity.this.simpleRenderer.rotate2(-diffRotationX * 145.0f);
+                MainActivity.this.simpleRenderer.rotate3(-diffRotationZ * 145.0f);
+            }
             float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
             this.imuAngle.setText(String.valueOf(angles[0]) + " " + String.valueOf(angles[1]) + " " + String.valueOf(angles[2]));
 
@@ -1052,19 +1057,26 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         extractor.compute(mat1, keyPointsObject, descriptorsObject); // extract descriptor
         extractor.compute(mat2, keyPointScene, descriptorsScene);
 
+
+
         DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
         matcher.match(descriptorsObject, descriptorsScene, matches); // match descriptor
+
+        Log.d("T", "feature size info: " + String.valueOf(descriptorsObject.height()) + " " + String.valueOf(descriptorsObject.width()) + " " + String.valueOf(descriptorsObject.channels())
+                                         + " " + String.valueOf(descriptorsScene.height()) + " " + String.valueOf(descriptorsScene.width()) + " " + String.valueOf(descriptorsScene.channels())
+                                        + " " + String.valueOf(matches.height()) + " " + String.valueOf(matches.width()) + " " + String.valueOf(matches.channels()));
 
         double maxDist = 0;
         double minDist = 100;
         List<DMatch> matchesList = matches.toList();
+        Log.d("T", "matches List: " + String.valueOf(matchesList.size()) + " " + String.valueOf(matchesList));
         for (int i = 0; i < descriptorsObject.rows(); i++) {
             Double dist = (double) matchesList.get(i).distance;
             if( dist < minDist ) minDist = dist;
             if( dist > maxDist ) maxDist = dist;
         }
         for(int i = 0; i < descriptorsObject.rows(); i++) {
-            if(matchesList.get(i).distance < 3 * minDist){
+            if(matchesList.get(i).distance < 2 * minDist){
                 goodMatches.addLast(matchesList.get(i)); // get good matches
             }
         }
@@ -1108,12 +1120,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     public Mat updateCameraPoseEstimation(Mat matH) {
         Mat pose = Mat.eye(3, 4, CvType.CV_32FC1);
 
-        Log.d("T", "pose matrix: " + pose.dump());
-        Log.d("T", "mat H: " + matH.dump());
+      //  Log.d("T", "pose matrix: " + pose.dump());
+      //  Log.d("T", "mat H: " + matH.dump());
         float norm1 = (float)norm(matH.col(0));
         float norm2 = (float)norm(matH.col(1));
         float tnorm = (norm1 + norm2) / 2.0f;
-        Log.d("T", "norms:" + String.valueOf(norm1) + " " + String.valueOf(norm2));
+    //    Log.d("T", "norms:" + String.valueOf(norm1) + " " + String.valueOf(norm2));
 
         Mat p1 = matH.col(0);
         Mat p2 = pose.col(0);
@@ -1121,7 +1133,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         pose.put(0,0, p2.get(0,0));
         pose.put(1,0, p2.get(1,0));
         pose.put(2,0, p2.get(2,0));
-        Log.d("T", "p1, p2, pose: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
+   //     Log.d("T", "p1, p2, pose: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
 
         p1 = matH.col(1);
         p2 = pose.col(2);
@@ -1129,25 +1141,25 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         pose.put(0,1, p2.get(0,0));
         pose.put(1,1, p2.get(1,0));
         pose.put(2,1, p2.get(2,0));
-        Log.d("T", "p1, p2, pose again: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
+  //      Log.d("T", "p1, p2, pose again: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
 
         p1 = pose.col(0);
         p2 = pose.col(1);
-        Log.d("T", "p1, p2 again again: " + p1.dump() + " " + p2.dump());
+   //     Log.d("T", "p1, p2 again again: " + p1.dump() + " " + p2.dump());
 
         Mat p3 = p1.cross(p2);
         pose.put(0,2, p3.get(0,0));
         pose.put(1,2, p3.get(1,0));
         pose.put(2,2, p3.get(2,0));
-        Log.d("T", "p3, pose: " + p3.dump() + " " + pose.dump());
+    //    Log.d("T", "p3, pose: " + p3.dump() + " " + pose.dump());
 
         Core.divide(matH.col(2), new Scalar(tnorm), p3);
-        Log.d("T", "p3, c2, matH: " + p3.dump() + " " + matH.dump());
+   //     Log.d("T", "p3, c2, matH: " + p3.dump() + " " + matH.dump());
         pose.put(0,3, p3.get(0,0));
         pose.put(1,3, p3.get(1,0));
         pose.put(2,3, p3.get(2,0));
-        Log.d("T", "c2, p3, pose: " + p3.dump() + " " + pose.dump());
-        Log.d("T", "null checking: " + String.valueOf(currCameraPoseFromBeacon==null) + " " + String.valueOf(pose == null));
+   //     Log.d("T", "c2, p3, pose: " + p3.dump() + " " + pose.dump());
+   //     Log.d("T", "null checking: " + String.valueOf(currCameraPoseFromBeacon==null) + " " + String.valueOf(pose == null));
         float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
         float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
         this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
