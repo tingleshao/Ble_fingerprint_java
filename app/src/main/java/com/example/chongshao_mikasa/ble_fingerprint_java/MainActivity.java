@@ -349,7 +349,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     // IMU related variables
     private SensorManager mSensorManager;
-    private Sensor mRotationVectorSensor, mAccelerationSensor;
+    private Sensor mRotationVectorSensor, mAccelerationSensor, mGravitySensor, mMagSensor;
+    // new
+    private float[] gravityValues = null;
+    private float[] magneticValues = null;
 
     private final float[] mRotationMatrix = new float[16];
     private volatile float[] mAccelerometerMatrix = new float[4];
@@ -418,6 +421,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     // control variable
     boolean useIMU;
+    Button imuon;
+    Button reset;
+    float[] prevR = null;
+    private int currselection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -560,27 +567,37 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         mAccelerationSensor = mSensorManager.getDefaultSensor(
                 Sensor.TYPE_LINEAR_ACCELERATION);
 
+        mGravitySensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_GRAVITY);
+        mMagSensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_MAGNETIC_FIELD);
+
         mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
         mSensorManager.registerListener(this, mAccelerationSensor, 5000);
+
+        mSensorManager.registerListener(this, mGravitySensor, 10000);
+        mSensorManager.registerListener(this, mMagSensor, 10000);
+
         rotationMsg = (TextView)this.findViewById(R.id.rotationMsg);
 
         //camera stuff
         cam = this.getCameraPreview();
 
         button = (Button)this.findViewById(R.id.button);
+        currselection = 0;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cam = MainActivity.this.getCameraPreview();
                 if (cam != null) {
-            //        Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
+//                    Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
 
                  //   Bitmap bitmap1g = toGrayscale(bitmap1);
            //         Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
-           //         Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample2);
-                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.box_in_scene);
-                    Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
+                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample3);
+                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.test0);
+             //       Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
                     Bitmap bitmap2g = toGrayscale(bitmap2);
                     Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
 
@@ -749,7 +766,28 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 MainActivity.this.simpleRenderer.testAnglesToM();
             }
         }));
+
+        // control stuff
         useIMU = false;
+        imuon = (Button)this.findViewById(R.id.imuon);
+        reset = (Button)this.findViewById(R.id.reset);
+        imuon.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (MainActivity.this.useIMU) {
+                    MainActivity.this.useIMU = false;
+                }
+                else {
+                    MainActivity.this.useIMU = true;
+                }
+            }
+        }));
+        reset.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.reset();
+            }
+        }));
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -967,50 +1005,103 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
   //      Log.d("T", "sensor changed!");
         // we received a sensor event. it is a good practice to check
         // that we received the proper event
-        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-
+        if (false && event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION && (gravityValues != null) && (magneticValues != null)) {
             float currAccelX = event.values[0];
             float currAccelY = event.values[1];
             float currAccelZ = event.values[2];
 
-           // mAccelerometerMatrix[0] = event.values[0];
-           // mAccelerometerMatrix[1] = event.values[1];
-           // mAccelerometerMatrix[2] = event.values[2];
-           // mAccelerometerMatrix[3] = 0;
+            float[] deviceRelativeAcceleration = new float[4];
+            deviceRelativeAcceleration[0] = event.values[0];
+            deviceRelativeAcceleration[1] = event.values[1];
+            deviceRelativeAcceleration[2] = event.values[2];
+            deviceRelativeAcceleration[3] = 0;
+
+            float[] R = new float[16], I = new float[16], earthAcc = new float[16];
+
+            SensorManager.getRotationMatrix(R, I, gravityValues, magneticValues);
+
+            float[] inv = new float[16];
+
+            android.opengl.Matrix.invertM(inv, 0, R, 0);
+            android.opengl.Matrix.multiplyMV(earthAcc, 0, inv, 0, deviceRelativeAcceleration, 0);
+            Log.d("Acceleration", "Values: (" + earthAcc[0] + ", " + earthAcc[1] + ", " + earthAcc[2] + ")");
+            // mAccelerometerMatrix[0] = event.values[0];
+            // mAccelerometerMatrix[1] = event.values[1];
+            // mAccelerometerMatrix[2] = event.values[2];
+            // mAccelerometerMatrix[3] = 0;
+
             if (useIMU) {
-                MainActivity.this.simpleRenderer.translate1(currAccelX * currAccelX * 0.1f);
-                MainActivity.this.simpleRenderer.translate2(currAccelY * currAccelY * 0.1f);
-                MainActivity.this.simpleRenderer.translate3(currAccelZ * currAccelZ * 0.1f);
+          //      MainActivity.this.simpleRenderer.translate1(currAccelX * currAccelX * 0.1f);
+          //      MainActivity.this.simpleRenderer.translate2(currAccelY * currAccelY * 0.1f);
+          //      MainActivity.this.simpleRenderer.translate3(currAccelZ * currAccelZ * 0.1f);
+                if (earthAcc[0] > 0) {
+                    MainActivity.this.simpleRenderer.translate1(earthAcc[0] * earthAcc[0] * -1.0f);
+                } else {
+                    MainActivity.this.simpleRenderer.translate1(earthAcc[0] * earthAcc[0] * 1.0f);
+                }
+                if (earthAcc[1] > 0) {
+                    MainActivity.this.simpleRenderer.translate3(earthAcc[1] * earthAcc[1] * 1.0f);
+                } else {
+                    MainActivity.this.simpleRenderer.translate3(earthAcc[1] * earthAcc[1] * -1.0f);
+                }
+                if (earthAcc[2] > 0) {
+                    MainActivity.this.simpleRenderer.translate2(earthAcc[2] * earthAcc[2] * 1.0f);
+                } else {
+                    MainActivity.this.simpleRenderer.translate2(earthAcc[2] * earthAcc[2] * -1.0f);
+                }
+            }
+        } else if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+            gravityValues = event.values;
+        } else if ( event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            magneticValues = event.values;
         }
 
-        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR && (gravityValues != null) && (magneticValues != null)) {
             // convert the rotation-vector to a 4x4 matrix. the matrix
             // is interpreted by Open GL as the inverse of the
             // rotation-vector, which is what we want.
             // TODO: use this rotation matrix
-            SensorManager.getRotationMatrixFromVector(
-                    mRotationMatrix, event.values);
-            float currRotationX = event.values[0];
-            float currRotationY = event.values[1];
-            float currRotationZ = event.values[2];
-
-            float diffRotationX = rotationX - currRotationX;
-            float diffRotationY = rotationY - currRotationY;
-            float diffRotationZ = rotationZ - currRotationZ;
             if (useIMU) {
-                MainActivity.this.simpleRenderer.rotate1(diffRotationY * 145.0f);
-                MainActivity.this.simpleRenderer.rotate2(-diffRotationX * 145.0f);
-                MainActivity.this.simpleRenderer.rotate3(-diffRotationZ * 145.0f);
+
+                float[] R = new float[16], I = new float[16];
+                float[] angleChange = null;
+       //         SensorManager.getRotationMatrix(R, I, gravityValues, magneticValues);
+                SensorManager.getRotationMatrixFromVector(R, event.values);
+                if (prevR == null) {
+                    prevR = R;
+                } else {
+                    angleChange = new float[3];
+                    SensorManager.getAngleChange(angleChange, R, prevR);
+
+                }
+
+                float currRotationX = event.values[0];
+                float currRotationY = event.values[1];
+                float currRotationZ = event.values[2];
+
+                float diffRotationX = rotationX - currRotationX;
+                float diffRotationY = rotationY - currRotationY;
+                float diffRotationZ = rotationZ - currRotationZ;
+                if (useIMU) {
+//                    MainActivity.this.simpleRenderer.rotate3(-diffRotationX * 180f);
+//                    MainActivity.this.simpleRenderer.rotate2(-diffRotationY *180f);
+//                    MainActivity.this.simpleRenderer.rotate1(-diffRotationZ *180f);
+                    if (angleChange != null) {
+                        MainActivity.this.simpleRenderer.rotate3(angleChange[0] * -180.f / (float)Math.PI );
+                        MainActivity.this.simpleRenderer.rotate2(angleChange[1]  * -180.f / (float)Math.PI );
+                        MainActivity.this.simpleRenderer.rotate1(angleChange[2]  * -180.f / (float)Math.PI );
+                    }
+                }
+                float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
+                this.imuAngle.setText(String.valueOf(angles[0]) + " " + String.valueOf(angles[1]) + " " + String.valueOf(angles[2]));
+
+                rotationX = currRotationX;
+                rotationY = currRotationY;
+                rotationZ = currRotationZ;
+                prevR = R;
+                rotationMsg.setText("rotation x: " + String.valueOf(rotationX) + "\n y: " +
+                        String.valueOf(rotationY) + "\n z: " + String.valueOf(rotationZ));
             }
-            float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
-            this.imuAngle.setText(String.valueOf(angles[0]) + " " + String.valueOf(angles[1]) + " " + String.valueOf(angles[2]));
-
-            rotationX = currRotationX;
-            rotationY = currRotationY;
-            rotationZ = currRotationZ;
-
-            rotationMsg.setText("rotation x: " + String.valueOf(rotationX) + "\n y: " +
-                    String.valueOf(rotationY) + "\n z: " + String.valueOf(rotationZ));
         }
     }
 
@@ -1148,30 +1239,52 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         Calib3d.decomposeHomographyMat(matH, K, rotations, translations,  normals);
         Mat pose = Mat.eye(3, 4, CvType.CV_32FC1);
-        Mat rotation1 = rotations.get(0);
-        Mat translation1 = translations.get(0);
-        Log.d("T", "number of solutions: " + String.valueOf(rotations.size()));
+        Mat rotation1 = new Mat();
+        Mat translation1 = new Mat();
+        boolean success = false;
+        for (int i = 0; i < 4; i++) {
+            rotation1 = rotations.get(i);
+            translation1 = translations.get(i);
+            pose.put(0,0, rotation1.get(0,0));
+            pose.put(1,0, rotation1.get(1,0));
+            pose.put(2,0, rotation1.get(2,0));
+            pose.put(0,1, rotation1.get(0,1));
+            pose.put(1,1, rotation1.get(1,1));
+            pose.put(2,1, rotation1.get(2,1));
+            pose.put(0,2, rotation1.get(0,2));
+            pose.put(1,2, rotation1.get(1,2));
+            pose.put(2,2, rotation1.get(2,2));
+            float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
+            boolean thisOK = true;
+            for (int j = 0 ; j < 3; j++) {
+                if (Math.abs(camAngles[j])> 50) {
+                    thisOK = false;
+                    break;
+                }
+            }
+            if (thisOK) {
+                success = true;
+                break;
+            }
+        }
+
+      //  Log.d("T", "number of solutions: " + String.valueOf(rotations.size()));
         //Log.d("T", "rotation / translation size: " + String.valueOf(rotation0.rows()) + "x" + String.valueOf(rotation0.cols()) + " " +
         //        String.valueOf(translation0.rows()) + "x" + String.valueOf(translation0.cols()));
-        pose.put(0,0, rotation1.get(0,0));
-        pose.put(1,0, rotation1.get(1,0));
-        pose.put(2,0, rotation1.get(2,0));
-        pose.put(0,1, rotation1.get(0,1));
-        pose.put(1,1, rotation1.get(1,1));
-        pose.put(2,1, rotation1.get(2,1));
-        pose.put(0,2, rotation1.get(0,2));
-        pose.put(1,2, rotation1.get(1,2));
-        pose.put(2,2, rotation1.get(2,2));
-        pose.put(0,3, translation1.get(0,0));
-        pose.put(1,3, translation1.get(1,0));
-        pose.put(2,3, translation1.get(2,0));
-        float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
-        float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
-        this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
-                + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
+        if (success) {
+            pose.put(0, 3, translation1.get(0, 0)[0] / 100f);
+            pose.put(1, 3, translation1.get(1, 0)[0] / 100f);
+            pose.put(2, 3, translation1.get(2, 0)[0] / 100f);
+            float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
+            float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
+            this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
+                    + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
 
-        this.simpleRenderer.cameraM = poseToCameraM(pose);
-        this.simpleRenderer.updateM(false);
+            this.simpleRenderer.cameraM = poseToCameraM(pose, this.simpleRenderer.cameraM);
+            this.simpleRenderer.updateM(false);
+        } else {
+            this.camLocationAngle.setText("not success");
+        }
         return pose;
     }
 
@@ -1225,13 +1338,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
         this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
                                      + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
-
-        this.simpleRenderer.cameraM = poseToCameraM(pose);
+        this.simpleRenderer.cameraM = poseToCameraM(pose,  this.simpleRenderer.cameraM );
         this.simpleRenderer.updateM(false);
         return pose;
     }
 
-    public float[] poseToCameraM(Mat pose) {
+    public float[] poseToCameraM(Mat pose, float[] oldcameraM) {
         float[] cameraM = new float[16];
         cameraM[0] = (float)pose.get(0,0)[0];
         cameraM[1] = (float)pose.get(1,0)[0];
@@ -1245,9 +1357,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         cameraM[9] = (float)pose.get(1,2)[0];
         cameraM[10] = (float)pose.get(2,2)[0];
         cameraM[11] = 0.0f;
-        cameraM[12] = (float)pose.get(0,3)[0]/100.f - 74.43878f;
-        cameraM[13] = (float)pose.get(1,3)[0]/100.f - 54.322666f;
-        cameraM[14] = (float)pose.get(2,3)[0]/100.f + 276.38602f;
+        Log.d("T", "WWWThis cameraM 12 13 14: " + String.valueOf(oldcameraM[12]) + " " + String.valueOf(oldcameraM[13]) + " " + String.valueOf(oldcameraM[14]));
+        Log.d("T", "WWWupdate 12 13 14: " + String.valueOf((float)pose.get(0,3)[0]/100.f) + " " + String.valueOf((float)pose.get(1,3)[0]/100.f) + " " + String.valueOf((float)pose.get(2,3)[0]/100.f));
+
+        cameraM[12] = (float)pose.get(0,3)[0]/100.f +  oldcameraM[12];
+        cameraM[13] = (float)pose.get(1,3)[0]/100.f +  oldcameraM[13];
+        cameraM[14] = (float)pose.get(2,3)[0]/100.f +  oldcameraM[14];
         cameraM[15] = 1.0f;
         return cameraM;
     }

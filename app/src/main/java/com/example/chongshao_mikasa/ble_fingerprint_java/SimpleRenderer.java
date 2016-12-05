@@ -44,6 +44,8 @@ public class SimpleRenderer extends ARRenderer  {
         this.activity = activity;
     }
 
+
+
     public SimpleRenderer() {
         beaconAngle.put("none", -1);
         beaconAngle.put("a75fa152-a904-4502-8ea8-192f8fcfee6a", 0);
@@ -55,10 +57,15 @@ public class SimpleRenderer extends ARRenderer  {
         beaconAngle.put("21f158a6-a083-4020-9b40-8cd34380ffc3", 270);
         beaconAngle.put("7691f1bd-284f-439d-8b1a-d223f0249b9b", 315);
      //   m = new float[16];
-        m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
-                -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
-                0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
-                -104.001564f, -24.064268f, -271.0829f, 1.0f};
+  //      m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
+  //              -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
+  //              0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
+   //             -50.001564f, -24.064268f, -271.0829f, 1.0f};
+
+        m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f, 0.0f,
+                        0.0f, 0.0f, 1.0f, 0.0f,
+                -15.0f, -50.0f, -500.0f, 1.0f};
 //        m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
 //                -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
 //                0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
@@ -97,6 +104,21 @@ public class SimpleRenderer extends ARRenderer  {
         angle2 = radToDegree(angles[1]);
         angle3 = radToDegree(angles[2]);
         Log.d("T", "angles: " + String.valueOf(angle1) + " " + String.valueOf(angle2) + " " + String.valueOf(angle3));
+    }
+
+    public void reset() {
+
+
+        m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                -15.0f, -50.0f, -500.0f, 1.0f};
+     //   m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
+     //           -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
+     //           0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
+     //           -104.001564f, -24.064268f, -271.0829f, 1.0f};
+        Matrix.invertM(cameraM, 0, m, 0);
+        Matrix.invertM(m, 0, cameraM, 0);
     }
 
     public float[] getCameraAngles() {
@@ -179,14 +201,11 @@ public class SimpleRenderer extends ARRenderer  {
     }
 
     public void rotate2(float delta_angle) {
-       // this.angle2 += delta_angle;
         Matrix.rotateM(cameraM, 0, cameraM, 0, delta_angle, 0, 1, 0);
         updateM(true);
-   //     this.displayAngles();
     }
 
     public void rotate3(float delta_angle) {
-    //    this.angle3 += delta_angle;
         Matrix.rotateM(cameraM, 0, cameraM, 0, delta_angle, 0, 0, 1);
         updateM(true);
     }
@@ -205,7 +224,6 @@ public class SimpleRenderer extends ARRenderer  {
         Matrix.translateM(cameraM, 0, cameraM, 0, 0, 0, delta_d);
         updateM(true);
     }
-
 
     public void updateM(boolean updateRotation) {
         // TODO: from camera M, update m

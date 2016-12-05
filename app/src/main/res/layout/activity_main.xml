@@ -304,4 +304,23 @@
         android:textSize="5sp"
         android:layout_height="20dp" />
 
+    <Button
+        android:text="imu on"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:layout_alignBottom="@+id/button"
+        android:layout_toEndOf="@+id/button"
+        android:id="@+id/imuon"
+        android:textSize="5sp" />
+
+    <Button
+        android:text="reset"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:layout_toEndOf="@+id/button"
+        android:id="@+id/reset"
+        android:textSize="5sp"
+        android:layout_alignBottom="@+id/record"
+        android:layout_alignTop="@+id/record" />
+
 </RelativeLayout>
