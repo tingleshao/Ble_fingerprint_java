@@ -426,6 +426,14 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     float[] prevR = null;
     private int currselection;
 
+    // translation IMU
+    static final float NS2S = 1.0f / 1000000000.0f;
+    float[] last_values = null;
+    float[] velocity = null;
+    float[] position = null;
+    float[] camtrans = null;
+    long last_timestamp = 0;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -500,42 +508,42 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                     for (Beacon beacon : list) {
                         if (beacon.getProximityUUID().equals(UUID.fromString("a75fa152-a904-4502-8ea8-192f8fcfee6a"))) { // 1
                             Log.d("Airport", "Beacon 0 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon0.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon0.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("0", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("9795a656-a244-47f5-b8ab-a24cf9728976"))) { // 15
                             Log.d("Airport", "Beacon 1 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon1.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon1.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("1", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("58deb431-0387-4aff-b04d-bf773f2409cc"))) { // 2
                             Log.d("Airport", "Beacon 2 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon2.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon2.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("2", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("e14f37ee-cd9c-41a1-b145-134570f9a8e8"))) { // 3
                             Log.d("Airport", "Beacon 3 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon3.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon3.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("3", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("b6fc3980-846c-4f48-bfc5-2b2e0ca2d702"))) { // 4
                             Log.d("Airport", "Beacon 4 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon4.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon4.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("4", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("9aa9bca6-b207-41f5-a076-d294c9b374db"))) { // 5
                             Log.d("Airport", "Beacon 5 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon5.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon5.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("5", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("21f158a6-a083-4020-9b40-8cd34380ffc3"))) { // 6
                             Log.d("Airport", "Beacon 6 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon6.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon6.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("6", beacon.getRssi());
                         }
                         if (beacon.getProximityUUID().equals(UUID.fromString("7691f1bd-284f-439d-8b1a-d223f0249b9b"))) { // 7
                             Log.d("Airport", "Beacon 7 dist: " + String.valueOf(beacon.getRssi()));
-                            beacon7.setText("distance: "+ String.valueOf(beacon.getRssi()));
+                            beacon7.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("7", beacon.getRssi());
                         }
                     }
@@ -590,13 +598,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 cam = MainActivity.this.getCameraPreview();
                 if (cam != null) {
-//                    Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
+                    Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
 
                  //   Bitmap bitmap1g = toGrayscale(bitmap1);
            //         Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
                     Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample3);
-                    Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.test0);
+            //        Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.test0);
              //       Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
                     Bitmap bitmap2g = toGrayscale(bitmap2);
                     Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
@@ -711,8 +719,11 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             public void onClick(View v) {
                 try {
                     FileOutputStream fos = new FileOutputStream(myExternalFile, true);
-                    ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
-                    String entry = MainActivity.this.generateEntry(fingerprint);
+                    float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
+               //     float[] translation = MainActivity.this.simpleRenderer.getCameraTranslation();
+                //    ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
+                //    String entry = MainActivity.this.generateEntry(fingerprint);
+                    String entry = MainActivity.this.generateCameraEntry(angles, camtrans);
                     fos.write(entry.getBytes());
                     fos.close();
                 } catch (IOException e) {
@@ -788,6 +799,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 MainActivity.this.simpleRenderer.reset();
             }
         }));
+
+        camtrans = new float[] {0.0f, 0.0f, 0.0f};
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -1024,7 +1037,27 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
             android.opengl.Matrix.invertM(inv, 0, R, 0);
             android.opengl.Matrix.multiplyMV(earthAcc, 0, inv, 0, deviceRelativeAcceleration, 0);
-            Log.d("Acceleration", "Values: (" + earthAcc[0] + ", " + earthAcc[1] + ", " + earthAcc[2] + ")");
+            if (velocity != null) {
+                Log.d("V", "Values: (" + velocity[0] + ", " + velocity[1] + ", " + velocity[2] + ")");
+            }
+            if (last_values != null) {
+                float dt = (event.timestamp - last_timestamp) * NS2S;
+                float mean = (velocity[1] +  velocity[0] +  velocity[2])/3;
+
+                for(int index = 0; index < 3; ++index){
+                    velocity[index] += (earthAcc[index] + last_values[index])/2 * dt;
+                    velocity[index] = velocity[index] - mean;
+                    position[index] = velocity[index] * dt;
+                }
+            } else {
+                last_values = new float[3];
+                velocity = new float[3];
+                position = new float[3];
+                velocity[0] = velocity[1] = velocity[2] = 0f;
+                position[0] = position[1] = position[2] = 0f;
+            }
+            System.arraycopy(earthAcc, 0, last_values, 0, 3);
+            last_timestamp = event.timestamp;
             // mAccelerometerMatrix[0] = event.values[0];
             // mAccelerometerMatrix[1] = event.values[1];
             // mAccelerometerMatrix[2] = event.values[2];
@@ -1034,21 +1067,21 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
           //      MainActivity.this.simpleRenderer.translate1(currAccelX * currAccelX * 0.1f);
           //      MainActivity.this.simpleRenderer.translate2(currAccelY * currAccelY * 0.1f);
           //      MainActivity.this.simpleRenderer.translate3(currAccelZ * currAccelZ * 0.1f);
-                if (earthAcc[0] > 0) {
-                    MainActivity.this.simpleRenderer.translate1(earthAcc[0] * earthAcc[0] * -1.0f);
-                } else {
-                    MainActivity.this.simpleRenderer.translate1(earthAcc[0] * earthAcc[0] * 1.0f);
-                }
-                if (earthAcc[1] > 0) {
-                    MainActivity.this.simpleRenderer.translate3(earthAcc[1] * earthAcc[1] * 1.0f);
-                } else {
-                    MainActivity.this.simpleRenderer.translate3(earthAcc[1] * earthAcc[1] * -1.0f);
-                }
-                if (earthAcc[2] > 0) {
-                    MainActivity.this.simpleRenderer.translate2(earthAcc[2] * earthAcc[2] * 1.0f);
-                } else {
-                    MainActivity.this.simpleRenderer.translate2(earthAcc[2] * earthAcc[2] * -1.0f);
-                }
+            //    if (earthAcc[0] > 0) {
+                    MainActivity.this.simpleRenderer.translate1(position[2] * 100f );
+            //    } else {
+            //        MainActivity.this.simpleRenderer.translate1(position[0]  * 0.1f);
+             //   }
+           //     if (earthAcc[1] > 0) {
+                    MainActivity.this.simpleRenderer.translate3(position[1]* 100f  );
+            //    } else {
+            //        MainActivity.this.simpleRenderer.translate3(position[1]  * -0.1f);
+            //    }
+            //    if (earthAcc[2] > 0) {
+                    MainActivity.this.simpleRenderer.translate2(position[0] * 100f );
+           //     } else {
+           //         MainActivity.this.simpleRenderer.translate2(position[2]  * -0.1f);
+           //     }
             }
         } else if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
             gravityValues = event.values;
@@ -1056,13 +1089,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             magneticValues = event.values;
         }
 
+        // rotation
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR && (gravityValues != null) && (magneticValues != null)) {
             // convert the rotation-vector to a 4x4 matrix. the matrix
             // is interpreted by Open GL as the inverse of the
             // rotation-vector, which is what we want.
-            // TODO: use this rotation matrix
             if (useIMU) {
-
                 float[] R = new float[16], I = new float[16];
                 float[] angleChange = null;
        //         SensorManager.getRotationMatrix(R, I, gravityValues, magneticValues);
@@ -1072,7 +1104,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 } else {
                     angleChange = new float[3];
                     SensorManager.getAngleChange(angleChange, R, prevR);
-
                 }
 
                 float currRotationX = event.values[0];
@@ -1159,8 +1190,6 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         DescriptorExtractor extractor = DescriptorExtractor.create(con);
         extractor.compute(mat1, keyPointsObject, descriptorsObject); // extract descriptor
         extractor.compute(mat2, keyPointScene, descriptorsScene);
-
-
 
         DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
         matcher.match(descriptorsObject, descriptorsScene, matches); // match descriptor
@@ -1276,12 +1305,15 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             pose.put(1, 3, translation1.get(1, 0)[0] / 100f);
             pose.put(2, 3, translation1.get(2, 0)[0] / 100f);
             float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
-            float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
+            camtrans = this.simpleRenderer.getTranslationFromPoseM(pose);
             this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
-                    + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
+                    + " " + String.valueOf(camtrans[0]) + " " + String.valueOf(camtrans[1]) + " " + String.valueOf(camtrans[2]));
+            MainActivity.this.simpleRenderer.rotate3(camAngles[0]);
+            MainActivity.this.simpleRenderer.rotate2(camAngles[2]);
+            MainActivity.this.simpleRenderer.rotate1(camAngles[1]);
 
-            this.simpleRenderer.cameraM = poseToCameraM(pose, this.simpleRenderer.cameraM);
-            this.simpleRenderer.updateM(false);
+           // this.simpleRenderer.cameraM = poseToCameraM(pose, this.simpleRenderer.cameraM);
+           // this.simpleRenderer.updateM(false);
         } else {
             this.camLocationAngle.setText("not success");
         }
@@ -1449,49 +1481,49 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         if (beacon0.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon0.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon0.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon1.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon1.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon1.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon2.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon2.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon2.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon3.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon3.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon3.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon4.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon4.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon4.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon5.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon5.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon5.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon6.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon6.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon6.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         if (beacon7.getText().toString().equals("TextView")) {
             currentFingerPrint.add(-100);
         } else {
-            Integer rssi = Integer.parseInt(beacon7.getText().toString().split(" ")[1]);
+            Integer rssi = Integer.parseInt(beacon7.getText().toString().split("/")[0]);
             currentFingerPrint.add(rssi);
         }
         return currentFingerPrint;
@@ -1504,6 +1536,29 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             entry = entry + " " + String.valueOf(item);
         }
         entry = entry + "#";
+        return entry;
+    }
+
+    public String generateIMUEntry(float[] angles) {
+        String location = this.spinner.getSelectedItem().toString();
+        String entry = "L"+location;
+        for (int i = 0; i < 3; i++) {
+            entry = entry + " " + String.valueOf(angles[i]);
+        }
+        entry = entry + "#";
+        return entry;
+    }
+
+    public String generateCameraEntry(float[] angles, float[] translations) {
+        String location = this.spinner.getSelectedItem().toString();
+        String entry = "L"+location;
+        for (int i = 0; i < 3; i++) {
+            entry = entry + " " + String.valueOf(angles[i]);
+        }
+        entry = entry + "@";
+        for (int i = 0; i < 3; i++) {
+            entry = entry + " " + String.valueOf(translations[i]);
+        }
         return entry;
     }
 

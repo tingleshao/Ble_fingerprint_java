@@ -7,6 +7,7 @@ import org.artoolkit.ar.base.ARToolKit;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.artoolkit.ar.base.rendering.Arrow;
 import org.artoolkit.ar.base.rendering.Cube;
+import org.artoolkit.ar.base.rendering.People;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -23,7 +24,9 @@ import javax.microedition.khronos.opengles.GL10;
 public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
-    private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
+  //  private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
+    private People cube = new People(40.0f, 0.0f, 0.0f, 20.0f);
+
     private float angle = 0.0f;
     private boolean spinning = false;
     private int drawCount = 0;
@@ -124,6 +127,11 @@ public class SimpleRenderer extends ARRenderer  {
     public float[] getCameraAngles() {
         float[] angles = mToAngles(new float[]{cameraM[0], cameraM[1], cameraM[2], cameraM[4], cameraM[5], cameraM[6], cameraM[8], cameraM[9], cameraM[10]});
         return new float[]{angles[0] * 180.0f / (float)Math.PI, angles[1] * 180.0f / (float)Math.PI, angles[2] * 180.0f / (float)Math.PI};
+    }
+
+    public float[] getCameraTranslation() {
+        float[] translation = new float[]{cameraM[12], cameraM[13], cameraM[14]};
+        return translation;
     }
 
     public float[] getAnglesFromPoseM(Mat pose) {
