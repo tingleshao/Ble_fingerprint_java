@@ -89,7 +89,7 @@ import static org.opencv.imgproc.Imgproc.resize;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
-public class MainActivity extends ARActivity implements SensorEventListener  {
+public class MainActivity extends ARActivity implements SensorEventListener {
 
     Core.MinMaxLocResult minmax;
 
@@ -309,18 +309,18 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             {-68, -72, -77, -86, -87, -80, -85, -82},
             {-68, -72, -77, -82, -87, -80, -85, -82},
             {-70, -75, -76, -85, -86, -80, -85, -82}
-};
+    };
     private static String[] locations = new String[]{"00", "01", "02", "03", "04", "05", "06",
-                                      "10", "11", "12", "13", "14", "15",
-                                      "20", "21", "22", "23", "24", "25",
-                                      "30", "31", "32", "33", "34", "35",
-                                      "40", "41", "42", "43", "44", "45",
-                                      "50", "51", "52", "53", "54", "55", "56",
-                                      "60", "61", "62", "63", "64", "65", "66",
-                                      "70", "71", "72", "73", "74", "75", "76",
-                                      "80", "81", "82", "83", "84", "85", "86",
-                                      "90", "91", "92", "93", "94", "95",
-                                      "a0", "a1", "a2", "a3", "a4", "a5"};
+            "10", "11", "12", "13", "14", "15",
+            "20", "21", "22", "23", "24", "25",
+            "30", "31", "32", "33", "34", "35",
+            "40", "41", "42", "43", "44", "45",
+            "50", "51", "52", "53", "54", "55", "56",
+            "60", "61", "62", "63", "64", "65", "66",
+            "70", "71", "72", "73", "74", "75", "76",
+            "80", "81", "82", "83", "84", "85", "86",
+            "90", "91", "92", "93", "94", "95",
+            "a0", "a1", "a2", "a3", "a4", "a5"};
 
     private BeaconManager beaconManager;
     private Region region0;
@@ -434,25 +434,31 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     float[] camtrans = null;
     long last_timestamp = 0;
 
+    // UI
+    int currspeed;
+    int currfreq;
+    Button speed;
+    Button freq;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         simpleRenderer.setActivity(this);
 
-        mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
-        mainLayout2 = (FrameLayout)this.findViewById(R.id.mainLayout2);
+        mainLayout = (FrameLayout) this.findViewById(R.id.mainLayout);
+        mainLayout2 = (FrameLayout) this.findViewById(R.id.mainLayout2);
         imageView = new ImageView(this);
         mainLayout2.addView(imageView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
-        beacon0 = (TextView)this.findViewById(R.id.beacon0);
-        beacon1 = (TextView)this.findViewById(R.id.beacon1);
-        beacon2 = (TextView)this.findViewById(R.id.beacon2);
-        beacon3 = (TextView)this.findViewById(R.id.beacon3);
-        beacon4 = (TextView)this.findViewById(R.id.beacon4);
-        beacon5 = (TextView)this.findViewById(R.id.beacon5);
-        beacon6 = (TextView)this.findViewById(R.id.beacon6);
-        beacon7 = (TextView)this.findViewById(R.id.beacon7);
+        beacon0 = (TextView) this.findViewById(R.id.beacon0);
+        beacon1 = (TextView) this.findViewById(R.id.beacon1);
+        beacon2 = (TextView) this.findViewById(R.id.beacon2);
+        beacon3 = (TextView) this.findViewById(R.id.beacon3);
+        beacon4 = (TextView) this.findViewById(R.id.beacon4);
+        beacon5 = (TextView) this.findViewById(R.id.beacon5);
+        beacon6 = (TextView) this.findViewById(R.id.beacon6);
+        beacon7 = (TextView) this.findViewById(R.id.beacon7);
 
         beaconManager = new BeaconManager(this);
 
@@ -546,9 +552,14 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                             beacon7.setText(String.valueOf(beacon.getRssi()) + "/" + String.valueOf(beacon.getMeasuredPower()));
                             beaconDistance.put("7", beacon.getRssi());
                         }
+
                     }
                 }
+                long startTime = System.currentTimeMillis();
                 updateARObjDirection();
+                long stopTime = System.currentTimeMillis();
+                long elapsedTime = stopTime - startTime;
+                Log.d("T", "BLE time:" + String.valueOf(elapsedTime));
             }
         });
 
@@ -569,7 +580,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         });
 
         //IMU related stuff
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(
                 Sensor.TYPE_ROTATION_VECTOR);
         mAccelerationSensor = mSensorManager.getDefaultSensor(
@@ -586,12 +597,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         mSensorManager.registerListener(this, mGravitySensor, 10000);
         mSensorManager.registerListener(this, mMagSensor, 10000);
 
-        rotationMsg = (TextView)this.findViewById(R.id.rotationMsg);
+        rotationMsg = (TextView) this.findViewById(R.id.rotationMsg);
 
         //camera stuff
         cam = this.getCameraPreview();
 
-        button = (Button)this.findViewById(R.id.button);
+        button = (Button) this.findViewById(R.id.button);
         currselection = 0;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -600,36 +611,39 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 if (cam != null) {
                     Bitmap bitmap1 = MainActivity.this.preview.getBitmap();
 
-                 //   Bitmap bitmap1g = toGrayscale(bitmap1);
-           //         Bitmap bitmap1f = locateFeaturePoint(bitmap1);
+                    //   Bitmap bitmap1g = toGrayscale(bitmap1);
+                    //         Bitmap bitmap1f = locateFeaturePoint(bitmap1);
 
-                    Bitmap bitmap2 =  BitmapFactory.decodeResource(getResources(), R.drawable.sample3);
-            //        Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.test0);
-             //       Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
+                    Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.sample3);
+                    //        Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.test0);
+                    //       Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.box);
                     Bitmap bitmap2g = toGrayscale(bitmap2);
+                    long startTime = System.currentTimeMillis();
                     Bitmap combinedBitmap = estimatePose(bitmap1, bitmap2g);
 
-                    if (combinedBitmap!=null) {
+                    long stopTime = System.currentTimeMillis();
+                    long elapsedTime = stopTime - startTime;
+                    Log.d("T", "CAM time:" + String.valueOf(elapsedTime));
+
+                    if (combinedBitmap != null) {
                         imageView.setImageBitmap(combinedBitmap);
-                    }
-                    else {
-                        Log.d("T", "bm null!"+ String.valueOf(MainActivity.this.myframe.length));
+                    } else {
+                        Log.d("T", "bm null!" + String.valueOf(MainActivity.this.myframe.length));
                     }
                     Log.d("T", "cam not null");
-                }
-                else {
+                } else {
                     Log.d("T", "cam null");
                 }
             }
         });
 
         // control translation
-        xup = (Button)this.findViewById(R.id.button2);
-        xdown = (Button)this.findViewById(R.id.button4);
-        yup = (Button)this.findViewById(R.id.button5);
-        ydown = (Button)this.findViewById(R.id.button6);
-        zup = (Button)this.findViewById(R.id.button7);
-        zdown = (Button)this.findViewById(R.id.button8);
+        xup = (Button) this.findViewById(R.id.button2);
+        xdown = (Button) this.findViewById(R.id.button4);
+        yup = (Button) this.findViewById(R.id.button5);
+        ydown = (Button) this.findViewById(R.id.button6);
+        zup = (Button) this.findViewById(R.id.button7);
+        zdown = (Button) this.findViewById(R.id.button8);
 
         xup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -669,12 +683,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         });
 
         // control rotation
-        r1up = (Button)this.findViewById(R.id.button9);
-        r1down = (Button)this.findViewById(R.id.button12);
-        r2up = (Button)this.findViewById(R.id.button10);
-        r2down = (Button)this.findViewById(R.id.button13);
-        r3up = (Button)this.findViewById(R.id.button11);
-        r3down = (Button)this.findViewById(R.id.button14);
+        r1up = (Button) this.findViewById(R.id.button9);
+        r1down = (Button) this.findViewById(R.id.button12);
+        r2up = (Button) this.findViewById(R.id.button10);
+        r2down = (Button) this.findViewById(R.id.button13);
+        r3up = (Button) this.findViewById(R.id.button11);
+        r3down = (Button) this.findViewById(R.id.button14);
         r1up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -713,16 +727,16 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         });
 
         // record fingerprint
-        record = (Button)this.findViewById(R.id.record);
+        record = (Button) this.findViewById(R.id.record);
         record.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     FileOutputStream fos = new FileOutputStream(myExternalFile, true);
                     float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
-               //     float[] translation = MainActivity.this.simpleRenderer.getCameraTranslation();
-                //    ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
-                //    String entry = MainActivity.this.generateEntry(fingerprint);
+                    //     float[] translation = MainActivity.this.simpleRenderer.getCameraTranslation();
+                    //    ArrayList<Integer> fingerprint = MainActivity.this.getCurrentFingerPrint();
+                    //    String entry = MainActivity.this.generateEntry(fingerprint);
                     String entry = MainActivity.this.generateCameraEntry(angles, camtrans);
                     fos.write(entry.getBytes());
                     fos.close();
@@ -734,17 +748,16 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             record.setEnabled(false);
-        }
-        else {
+        } else {
             myExternalFile = new File(getExternalFilesDir(filepath), filename);
         }
-        spinner = (Spinner)this.findViewById(R.id.spinner);
+        spinner = (Spinner) this.findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.fingerprints_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        read = (Button)this.findViewById(R.id.read);
+        read = (Button) this.findViewById(R.id.read);
         read.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -753,7 +766,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         }));
 
         // match fingerprint
-        match = (Button)this.findViewById(R.id.match);
+        match = (Button) this.findViewById(R.id.match);
         match.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -765,12 +778,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         }));
 
         // display current status
-        beaconLocation = (TextView)this.findViewById(R.id.beaconPosition);
-        imuAngle = (TextView)this.findViewById(R.id.imuAngle);
-        camLocationAngle = (TextView)this.findViewById(R.id.camAnglePosition);
+        beaconLocation = (TextView) this.findViewById(R.id.beaconPosition);
+        imuAngle = (TextView) this.findViewById(R.id.imuAngle);
+        camLocationAngle = (TextView) this.findViewById(R.id.camAnglePosition);
 
         // test
-        test = (Button)this.findViewById(R.id.test);
+        test = (Button) this.findViewById(R.id.test);
         test.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -779,16 +792,15 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         }));
 
         // control stuff
-        useIMU = false;
-        imuon = (Button)this.findViewById(R.id.imuon);
-        reset = (Button)this.findViewById(R.id.reset);
+        useIMU = true;
+        imuon = (Button) this.findViewById(R.id.imuon);
+        reset = (Button) this.findViewById(R.id.reset);
         imuon.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.this.useIMU) {
                     MainActivity.this.useIMU = false;
-                }
-                else {
+                } else {
                     MainActivity.this.useIMU = true;
                 }
             }
@@ -800,24 +812,53 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             }
         }));
 
-        camtrans = new float[] {0.0f, 0.0f, 0.0f};
+        camtrans = new float[]{0.0f, 0.0f, 0.0f};
+
+        currspeed = 0;
+        currfreq = 3;
+        speed = (Button)this.findViewById(R.id.speed);
+        freq = (Button)this.findViewById(R.id.freq);
+        speed.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                MainActivity.this.simpleRenderer.resetPeople();;
+//
+//                if (currspeed == 0) {
+//                  currspeed = 1;
+//              } else {
+//                  currspeed = 0;
+//              }
+                MainActivity.this.simpleRenderer.reset();
+            }
+        }));
+        freq.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.simpleRenderer.resetPeople();;
+                if (currfreq == 15) {
+                    currfreq = 3;
+                } else {
+                    currfreq = currfreq + 3;
+                }
+            }
+        }));
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
-                case LoaderCallbackInterface.SUCCESS:
-                {
+                case LoaderCallbackInterface.SUCCESS: {
                     Log.i("OpenCV", "OpenCV loaded successfully");
                     image = new Mat();
                     mask = new Mat();
                     detector = FeatureDetector.create(FeatureDetector.HARRIS);
-                } break;
-                default:
-                {
+                }
+                break;
+                default: {
                     super.onManagerConnected(status);
-                } break;
+                }
+                break;
             }
         }
     };
@@ -851,7 +892,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     public Bitmap locateFeaturePoint(Bitmap input) {
         Utils.bitmapToMat(input, image);
         Mat imagei = new Mat();
-        Imgproc.cvtColor(image,  imagei, Imgproc.COLOR_RGBA2GRAY);
+        Imgproc.cvtColor(image, imagei, Imgproc.COLOR_RGBA2GRAY);
 
         MatOfKeyPoint keypoints = new MatOfKeyPoint();
         detector.detect(imagei, keypoints);
@@ -862,14 +903,13 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Mat outputImage = new Mat();
         Scalar color = new Scalar(0, 0, 255); // BGR
         int flags = Features2d.DRAW_RICH_KEYPOINTS; // For each keypoint, the circle around keypoint with keypoint size and orientation will be drawn.
-        Features2d.drawKeypoints(imagei, keypoints, outputImage, color , flags);
+        Features2d.drawKeypoints(imagei, keypoints, outputImage, color, flags);
         Utils.matToBitmap(outputImage, input);
 
         return input;
     }
 
-    public Bitmap toGrayscale(Bitmap bmpOriginal)
-    {
+    public Bitmap toGrayscale(Bitmap bmpOriginal) {
         int width, height;
         height = bmpOriginal.getHeight();
         width = bmpOriginal.getWidth();
@@ -895,7 +935,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 largeRssi = beaconDistance.get(String.valueOf(i));
             }
         }
-     //   this.closestUUID = beaconUUID.get(largeId);
+        //   this.closestUUID = beaconUUID.get(largeId);
         this.closestUUID = largeId;
         return;
     }
@@ -1015,7 +1055,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     // IMU related methods
     public void onSensorChanged(SensorEvent event) {
-  //      Log.d("T", "sensor changed!");
+        //      Log.d("T", "sensor changed!");
         // we received a sensor event. it is a good practice to check
         // that we received the proper event
         if (false && event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION && (gravityValues != null) && (magneticValues != null)) {
@@ -1042,10 +1082,10 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             }
             if (last_values != null) {
                 float dt = (event.timestamp - last_timestamp) * NS2S;
-                float mean = (velocity[1] +  velocity[0] +  velocity[2])/3;
+                float mean = (velocity[1] + velocity[0] + velocity[2]) / 3;
 
-                for(int index = 0; index < 3; ++index){
-                    velocity[index] += (earthAcc[index] + last_values[index])/2 * dt;
+                for (int index = 0; index < 3; ++index) {
+                    velocity[index] += (earthAcc[index] + last_values[index]) / 2 * dt;
                     velocity[index] = velocity[index] - mean;
                     position[index] = velocity[index] * dt;
                 }
@@ -1064,28 +1104,28 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             // mAccelerometerMatrix[3] = 0;
 
             if (useIMU) {
-          //      MainActivity.this.simpleRenderer.translate1(currAccelX * currAccelX * 0.1f);
-          //      MainActivity.this.simpleRenderer.translate2(currAccelY * currAccelY * 0.1f);
-          //      MainActivity.this.simpleRenderer.translate3(currAccelZ * currAccelZ * 0.1f);
-            //    if (earthAcc[0] > 0) {
-                    MainActivity.this.simpleRenderer.translate1(position[2] * 100f );
-            //    } else {
-            //        MainActivity.this.simpleRenderer.translate1(position[0]  * 0.1f);
-             //   }
-           //     if (earthAcc[1] > 0) {
-                    MainActivity.this.simpleRenderer.translate3(position[1]* 100f  );
-            //    } else {
-            //        MainActivity.this.simpleRenderer.translate3(position[1]  * -0.1f);
-            //    }
-            //    if (earthAcc[2] > 0) {
-                    MainActivity.this.simpleRenderer.translate2(position[0] * 100f );
-           //     } else {
-           //         MainActivity.this.simpleRenderer.translate2(position[2]  * -0.1f);
-           //     }
+                //      MainActivity.this.simpleRenderer.translate1(currAccelX * currAccelX * 0.1f);
+                //      MainActivity.this.simpleRenderer.translate2(currAccelY * currAccelY * 0.1f);
+                //      MainActivity.this.simpleRenderer.translate3(currAccelZ * currAccelZ * 0.1f);
+                //    if (earthAcc[0] > 0) {
+                MainActivity.this.simpleRenderer.translate1(position[2] * 100f);
+                //    } else {
+                //        MainActivity.this.simpleRenderer.translate1(position[0]  * 0.1f);
+                //   }
+                //     if (earthAcc[1] > 0) {
+                MainActivity.this.simpleRenderer.translate3(position[1] * 100f);
+                //    } else {
+                //        MainActivity.this.simpleRenderer.translate3(position[1]  * -0.1f);
+                //    }
+                //    if (earthAcc[2] > 0) {
+                MainActivity.this.simpleRenderer.translate2(position[0] * 100f);
+                //     } else {
+                //         MainActivity.this.simpleRenderer.translate2(position[2]  * -0.1f);
+                //     }
             }
         } else if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
             gravityValues = event.values;
-        } else if ( event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             magneticValues = event.values;
         }
 
@@ -1095,9 +1135,11 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             // is interpreted by Open GL as the inverse of the
             // rotation-vector, which is what we want.
             if (useIMU) {
+                long startTime = System.currentTimeMillis();
+
                 float[] R = new float[16], I = new float[16];
                 float[] angleChange = null;
-       //         SensorManager.getRotationMatrix(R, I, gravityValues, magneticValues);
+                //         SensorManager.getRotationMatrix(R, I, gravityValues, magneticValues);
                 SensorManager.getRotationMatrixFromVector(R, event.values);
                 if (prevR == null) {
                     prevR = R;
@@ -1118,11 +1160,15 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 //                    MainActivity.this.simpleRenderer.rotate2(-diffRotationY *180f);
 //                    MainActivity.this.simpleRenderer.rotate1(-diffRotationZ *180f);
                     if (angleChange != null) {
-                        MainActivity.this.simpleRenderer.rotate3(angleChange[0] * -180.f / (float)Math.PI );
-                        MainActivity.this.simpleRenderer.rotate2(angleChange[1]  * -180.f / (float)Math.PI );
-                        MainActivity.this.simpleRenderer.rotate1(angleChange[2]  * -180.f / (float)Math.PI );
+                        MainActivity.this.simpleRenderer.rotate3(angleChange[0] * -180.f / (float) Math.PI);
+                        MainActivity.this.simpleRenderer.rotate2(angleChange[1] * -180.f / (float) Math.PI);
+                        MainActivity.this.simpleRenderer.rotate1(angleChange[2] * -180.f / (float) Math.PI);
                     }
                 }
+
+                long stopTime = System.currentTimeMillis();
+                long elapsedTime = stopTime - startTime;
+                Log.d("T", "IMU time:" + String.valueOf(elapsedTime));
                 float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
                 this.imuAngle.setText(String.valueOf(angles[0]) + " " + String.valueOf(angles[1]) + " " + String.valueOf(angles[2]));
 
@@ -1157,12 +1203,12 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Mat mat1 = new Mat();
         Mat mat2 = new Mat();
         Utils.bitmapToMat(bitmap1, mat1);
-        Size size = new Size(504,378);//the dst image size,e.g.100x100
+        Size size = new Size(504, 378);//the dst image size,e.g.100x100
         Mat dst = new Mat();//dst image
-        resize(mat1,dst,size);//resize image
+        resize(mat1, dst, size);//resize image
 
         Utils.bitmapToMat(bitmap2, mat2);
-        resize(mat2,dst,size);//resize image
+        resize(mat2, dst, size);//resize image
 
 ///        Log.d("T", "bitmap1 size: " + String.valueOf(bitmap1.getHeight()) + " " + String.valueOf(bitmap1.getWidth()) );
 
@@ -1195,8 +1241,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         matcher.match(descriptorsObject, descriptorsScene, matches); // match descriptor
 
         Log.d("T", "feature size info: " + String.valueOf(descriptorsObject.height()) + " " + String.valueOf(descriptorsObject.width()) + " " + String.valueOf(descriptorsObject.channels())
-                                         + " " + String.valueOf(descriptorsScene.height()) + " " + String.valueOf(descriptorsScene.width()) + " " + String.valueOf(descriptorsScene.channels())
-                                        + " " + String.valueOf(matches.height()) + " " + String.valueOf(matches.width()) + " " + String.valueOf(matches.channels()));
+                + " " + String.valueOf(descriptorsScene.height()) + " " + String.valueOf(descriptorsScene.width()) + " " + String.valueOf(descriptorsScene.channels())
+                + " " + String.valueOf(matches.height()) + " " + String.valueOf(matches.width()) + " " + String.valueOf(matches.channels()));
 
         double maxDist = 0;
         double minDist = 100;
@@ -1204,11 +1250,11 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Log.d("T", "matches List: " + String.valueOf(matchesList.size()) + " " + String.valueOf(matchesList));
         for (int i = 0; i < descriptorsObject.rows(); i++) {
             Double dist = (double) matchesList.get(i).distance;
-            if( dist < minDist ) minDist = dist;
-            if( dist > maxDist ) maxDist = dist;
+            if (dist < minDist) minDist = dist;
+            if (dist > maxDist) maxDist = dist;
         }
-        for(int i = 0; i < descriptorsObject.rows(); i++) {
-            if(matchesList.get(i).distance < 2 * minDist) {
+        for (int i = 0; i < descriptorsObject.rows(); i++) {
+            if (matchesList.get(i).distance < 2 * minDist) {
                 goodMatches.addLast(matchesList.get(i)); // get good matches
             }
         }
@@ -1217,7 +1263,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
         List<KeyPoint> keyPointsObjectList = keyPointsObject.toList();
         List<KeyPoint> keyPointsSceneList = keyPointScene.toList();
-        for(int i = 0; i< goodMatches.size(); i++) {
+        for (int i = 0; i < goodMatches.size(); i++) {
             objList.addLast(keyPointsObjectList.get(goodMatches.get(i).queryIdx).pt);
             sceneList.addLast(keyPointsSceneList.get(goodMatches.get(i).trainIdx).pt);
         }
@@ -1243,30 +1289,30 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Mat matH = Calib3d.findHomography(obj, scene);
         this.currCameraPoseFromCam = updateCameraPoseEstimation2(matH);
 
-   //     Mat warping = mat1.clone();
-   //     org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
-   //     Imgproc.warpPerspective(mat1, warping , matH, ims);
+        //     Mat warping = mat1.clone();
+        //     org.opencv.core.Size ims = new org.opencv.core.Size(mat1.cols(),mat1.rows());
+        //     Imgproc.warpPerspective(mat1, warping , matH, ims);
         return bitmap;
     }
 
     public Mat updateCameraPoseEstimation2(Mat matH) {
-        Mat K = new Mat(3,3,CvType.CV_64FC1);
+        Mat K = new Mat(3, 3, CvType.CV_64FC1);
 
-        K.put(0,0,3.97f);
-        K.put(1,0,0.0f);
-        K.put(2,0,0.0f);
-        K.put(0,1,0.0f);
-        K.put(1,1,3.97f);
-        K.put(2,1,0.0f);
-        K.put(0,2,252.0f);
-        K.put(1,2,189.0f);
-        K.put(2,2,1.0f);
+        K.put(0, 0, 3.97f);
+        K.put(1, 0, 0.0f);
+        K.put(2, 0, 0.0f);
+        K.put(0, 1, 0.0f);
+        K.put(1, 1, 3.97f);
+        K.put(2, 1, 0.0f);
+        K.put(0, 2, 252.0f);
+        K.put(1, 2, 189.0f);
+        K.put(2, 2, 1.0f);
 
         ArrayList<Mat> rotations = new ArrayList<Mat>();
         ArrayList<Mat> translations = new ArrayList<Mat>();
         ArrayList<Mat> normals = new ArrayList<Mat>();
 
-        Calib3d.decomposeHomographyMat(matH, K, rotations, translations,  normals);
+        Calib3d.decomposeHomographyMat(matH, K, rotations, translations, normals);
         Mat pose = Mat.eye(3, 4, CvType.CV_32FC1);
         Mat rotation1 = new Mat();
         Mat translation1 = new Mat();
@@ -1274,19 +1320,19 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         for (int i = 0; i < 4; i++) {
             rotation1 = rotations.get(i);
             translation1 = translations.get(i);
-            pose.put(0,0, rotation1.get(0,0));
-            pose.put(1,0, rotation1.get(1,0));
-            pose.put(2,0, rotation1.get(2,0));
-            pose.put(0,1, rotation1.get(0,1));
-            pose.put(1,1, rotation1.get(1,1));
-            pose.put(2,1, rotation1.get(2,1));
-            pose.put(0,2, rotation1.get(0,2));
-            pose.put(1,2, rotation1.get(1,2));
-            pose.put(2,2, rotation1.get(2,2));
+            pose.put(0, 0, rotation1.get(0, 0));
+            pose.put(1, 0, rotation1.get(1, 0));
+            pose.put(2, 0, rotation1.get(2, 0));
+            pose.put(0, 1, rotation1.get(0, 1));
+            pose.put(1, 1, rotation1.get(1, 1));
+            pose.put(2, 1, rotation1.get(2, 1));
+            pose.put(0, 2, rotation1.get(0, 2));
+            pose.put(1, 2, rotation1.get(1, 2));
+            pose.put(2, 2, rotation1.get(2, 2));
             float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
             boolean thisOK = true;
-            for (int j = 0 ; j < 3; j++) {
-                if (Math.abs(camAngles[j])> 50) {
+            for (int j = 0; j < 3; j++) {
+                if (Math.abs(camAngles[j]) > 50) {
                     thisOK = false;
                     break;
                 }
@@ -1297,7 +1343,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             }
         }
 
-      //  Log.d("T", "number of solutions: " + String.valueOf(rotations.size()));
+        //  Log.d("T", "number of solutions: " + String.valueOf(rotations.size()));
         //Log.d("T", "rotation / translation size: " + String.valueOf(rotation0.rows()) + "x" + String.valueOf(rotation0.cols()) + " " +
         //        String.valueOf(translation0.rows()) + "x" + String.valueOf(translation0.cols()));
         if (success) {
@@ -1312,8 +1358,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             MainActivity.this.simpleRenderer.rotate2(camAngles[2]);
             MainActivity.this.simpleRenderer.rotate1(camAngles[1]);
 
-           // this.simpleRenderer.cameraM = poseToCameraM(pose, this.simpleRenderer.cameraM);
-           // this.simpleRenderer.updateM(false);
+            // this.simpleRenderer.cameraM = poseToCameraM(pose, this.simpleRenderer.cameraM);
+            // this.simpleRenderer.updateM(false);
         } else {
             this.camLocationAngle.setText("not success");
         }
@@ -1324,77 +1370,77 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     public Mat updateCameraPoseEstimation(Mat matH) {
         Mat pose = Mat.eye(3, 4, CvType.CV_32FC1);
 
-      //  Log.d("T", "pose matrix: " + pose.dump());
-      //  Log.d("T", "mat H: " + matH.dump());
-        float norm1 = (float)norm(matH.col(0));
-        float norm2 = (float)norm(matH.col(1));
+        //  Log.d("T", "pose matrix: " + pose.dump());
+        //  Log.d("T", "mat H: " + matH.dump());
+        float norm1 = (float) norm(matH.col(0));
+        float norm2 = (float) norm(matH.col(1));
         float tnorm = (norm1 + norm2) / 2.0f;
-    //    Log.d("T", "norms:" + String.valueOf(norm1) + " " + String.valueOf(norm2));
+        //    Log.d("T", "norms:" + String.valueOf(norm1) + " " + String.valueOf(norm2));
 
         Mat p1 = matH.col(0);
         Mat p2 = pose.col(0);
         normalize(p1, p2);
-        pose.put(0,0, p2.get(0,0));
-        pose.put(1,0, p2.get(1,0));
-        pose.put(2,0, p2.get(2,0));
-   //     Log.d("T", "p1, p2, pose: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
+        pose.put(0, 0, p2.get(0, 0));
+        pose.put(1, 0, p2.get(1, 0));
+        pose.put(2, 0, p2.get(2, 0));
+        //     Log.d("T", "p1, p2, pose: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
 
         p1 = matH.col(1);
         p2 = pose.col(2);
         normalize(p1, p2);
-        pose.put(0,1, p2.get(0,0));
-        pose.put(1,1, p2.get(1,0));
-        pose.put(2,1, p2.get(2,0));
-  //      Log.d("T", "p1, p2, pose again: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
+        pose.put(0, 1, p2.get(0, 0));
+        pose.put(1, 1, p2.get(1, 0));
+        pose.put(2, 1, p2.get(2, 0));
+        //      Log.d("T", "p1, p2, pose again: " + p1.dump() + " " + p2.dump() + " " + pose.dump());
 
         p1 = pose.col(0);
         p2 = pose.col(1);
-   //     Log.d("T", "p1, p2 again again: " + p1.dump() + " " + p2.dump());
+        //     Log.d("T", "p1, p2 again again: " + p1.dump() + " " + p2.dump());
 
         Mat p3 = p1.cross(p2);
-        pose.put(0,2, p3.get(0,0));
-        pose.put(1,2, p3.get(1,0));
-        pose.put(2,2, p3.get(2,0));
-    //    Log.d("T", "p3, pose: " + p3.dump() + " " + pose.dump());
-        tnorm = (float)norm(matH.col(2));
+        pose.put(0, 2, p3.get(0, 0));
+        pose.put(1, 2, p3.get(1, 0));
+        pose.put(2, 2, p3.get(2, 0));
+        //    Log.d("T", "p3, pose: " + p3.dump() + " " + pose.dump());
+        tnorm = (float) norm(matH.col(2));
 
         Core.divide(matH.col(2), new Scalar(tnorm), p3);
 
-   //     Log.d("T", "p3, c2, matH: " + p3.dump() + " " + matH.dump());
-        pose.put(0,3, p3.get(0,0));
-        pose.put(1,3, p3.get(1,0));
-        pose.put(2,3, p3.get(2,0));
-   //     Log.d("T", "c2, p3, pose: " + p3.dump() + " " + pose.dump());
-   //     Log.d("T", "null checking: " + String.valueOf(currCameraPoseFromBeacon==null) + " " + String.valueOf(pose == null));
+        //     Log.d("T", "p3, c2, matH: " + p3.dump() + " " + matH.dump());
+        pose.put(0, 3, p3.get(0, 0));
+        pose.put(1, 3, p3.get(1, 0));
+        pose.put(2, 3, p3.get(2, 0));
+        //     Log.d("T", "c2, p3, pose: " + p3.dump() + " " + pose.dump());
+        //     Log.d("T", "null checking: " + String.valueOf(currCameraPoseFromBeacon==null) + " " + String.valueOf(pose == null));
         float[] camAngles = this.simpleRenderer.getAnglesFromPoseM(pose);
         float[] camTrans = this.simpleRenderer.getTranslationFromPoseM(pose);
         this.camLocationAngle.setText(String.valueOf(camAngles[0]) + " " + String.valueOf(camAngles[1]) + " " + String.valueOf(camAngles[2])
-                                     + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
-        this.simpleRenderer.cameraM = poseToCameraM(pose,  this.simpleRenderer.cameraM );
+                + " " + String.valueOf(camTrans[0]) + " " + String.valueOf(camTrans[1]) + " " + String.valueOf(camTrans[2]));
+        this.simpleRenderer.cameraM = poseToCameraM(pose, this.simpleRenderer.cameraM);
         this.simpleRenderer.updateM(false);
         return pose;
     }
 
     public float[] poseToCameraM(Mat pose, float[] oldcameraM) {
         float[] cameraM = new float[16];
-        cameraM[0] = (float)pose.get(0,0)[0];
-        cameraM[1] = (float)pose.get(1,0)[0];
-        cameraM[2] = (float)pose.get(2,0)[0];
+        cameraM[0] = (float) pose.get(0, 0)[0];
+        cameraM[1] = (float) pose.get(1, 0)[0];
+        cameraM[2] = (float) pose.get(2, 0)[0];
         cameraM[3] = 0.0f;
-        cameraM[4] = (float)pose.get(0,1)[0];
-        cameraM[5] = (float)pose.get(1,1)[0];
-        cameraM[6] = (float)pose.get(2,1)[0];
+        cameraM[4] = (float) pose.get(0, 1)[0];
+        cameraM[5] = (float) pose.get(1, 1)[0];
+        cameraM[6] = (float) pose.get(2, 1)[0];
         cameraM[7] = 0.0f;
-        cameraM[8] = (float)pose.get(0,2)[0];
-        cameraM[9] = (float)pose.get(1,2)[0];
-        cameraM[10] = (float)pose.get(2,2)[0];
+        cameraM[8] = (float) pose.get(0, 2)[0];
+        cameraM[9] = (float) pose.get(1, 2)[0];
+        cameraM[10] = (float) pose.get(2, 2)[0];
         cameraM[11] = 0.0f;
         Log.d("T", "WWWThis cameraM 12 13 14: " + String.valueOf(oldcameraM[12]) + " " + String.valueOf(oldcameraM[13]) + " " + String.valueOf(oldcameraM[14]));
-        Log.d("T", "WWWupdate 12 13 14: " + String.valueOf((float)pose.get(0,3)[0]/100.f) + " " + String.valueOf((float)pose.get(1,3)[0]/100.f) + " " + String.valueOf((float)pose.get(2,3)[0]/100.f));
+        Log.d("T", "WWWupdate 12 13 14: " + String.valueOf((float) pose.get(0, 3)[0] / 100.f) + " " + String.valueOf((float) pose.get(1, 3)[0] / 100.f) + " " + String.valueOf((float) pose.get(2, 3)[0] / 100.f));
 
-        cameraM[12] = (float)pose.get(0,3)[0]/100.f +  oldcameraM[12];
-        cameraM[13] = (float)pose.get(1,3)[0]/100.f +  oldcameraM[13];
-        cameraM[14] = (float)pose.get(2,3)[0]/100.f +  oldcameraM[14];
+        cameraM[12] = (float) pose.get(0, 3)[0] / 100.f + oldcameraM[12];
+        cameraM[13] = (float) pose.get(1, 3)[0] / 100.f + oldcameraM[13];
+        cameraM[14] = (float) pose.get(2, 3)[0] / 100.f + oldcameraM[14];
         cameraM[15] = 1.0f;
         return cameraM;
     }
@@ -1403,7 +1449,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         Bitmap cs = null;
         int width, height = 0;
 
-        if(c.getWidth() > s.getWidth()) {
+        if (c.getWidth() > s.getWidth()) {
             width = c.getWidth() + s.getWidth();
             height = c.getHeight();
         } else {
@@ -1426,20 +1472,20 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
             int[] dbEntry = fingerprintDatabase[k];
             int currSSD = 0;
             for (int j = 0; j < 4; j++) {
-                currSSD = currSSD + (int)Math.pow((double)(dbEntry[j*2] - fingerprint.get(j*2)), 2.0);
+                currSSD = currSSD + (int) Math.pow((double) (dbEntry[j * 2] - fingerprint.get(j * 2)), 2.0);
                 if (currSSD < minSSD) {
                     minSSD = currSSD;
                     minSSDid = k;
                 }
             }
         }
-        return locations[minSSDid/3];
+        return locations[minSSDid / 3];
     }
 
     public String matchFingerprint2(ArrayList<Integer> fingerprint) {
         double maxCorr = 0.0;
         int maxCorrId = -1;
-        double [] fingerprintdouble = new double[8];
+        double[] fingerprintdouble = new double[8];
         for (int i = 0; i < 8; i++) {
             fingerprintdouble[i] = fingerprint.get(i);
         }
@@ -1449,7 +1495,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         for (int k = 0; k < fingerprintDatabase.length; k++) {
             int[] dbEntry = fingerprintDatabase[k];
             for (int i = 0; i < 8; i++) {
-                dbentrydouble[i] = (double)dbEntry[i];
+                dbentrydouble[i] = (double) dbEntry[i];
             }
             double currCorr = pc.correlation(dbentrydouble, fingerprintdouble);
             if (currCorr > maxCorr) {
@@ -1457,7 +1503,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
                 maxCorrId = k;
             }
         }
-        return locations[maxCorrId/3];
+        return locations[maxCorrId / 3];
     }
 
     private static boolean isExternalStorageReadOnly() {
@@ -1531,7 +1577,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     public String generateEntry(ArrayList<Integer> fingerprint) {
         String location = this.spinner.getSelectedItem().toString();
-        String entry = "L"+location;
+        String entry = "L" + location;
         for (Integer item : fingerprint) {
             entry = entry + " " + String.valueOf(item);
         }
@@ -1541,7 +1587,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     public String generateIMUEntry(float[] angles) {
         String location = this.spinner.getSelectedItem().toString();
-        String entry = "L"+location;
+        String entry = "L" + location;
         for (int i = 0; i < 3; i++) {
             entry = entry + " " + String.valueOf(angles[i]);
         }
@@ -1551,7 +1597,7 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     public String generateCameraEntry(float[] angles, float[] translations) {
         String location = this.spinner.getSelectedItem().toString();
-        String entry = "L"+location;
+        String entry = "L" + location;
         for (int i = 0; i < 3; i++) {
             entry = entry + " " + String.valueOf(angles[i]);
         }
@@ -1582,8 +1628,8 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
 
     public void updateUsingKalmanFilter() {
         KalmanFilter kf = new KalmanFilter(18, 6, 0, CvType.CV_32F);
-      //  kalman.set
-        int nStates= 18;
+        //  kalman.set
+        int nStates = 18;
         int nMeasurements = 6;
         int nInputs = 0;
         double dt = 0.125;
@@ -1599,9 +1645,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         transitionMatrix.put(3, 6, dt);
         transitionMatrix.put(4, 7, dt);
         transitionMatrix.put(5, 8, dt);
-        transitionMatrix.put(0, 6, 0.5*Math.pow(dt, 2.0));
-        transitionMatrix.put(1, 7, 0.5*Math.pow(dt, 2.0));
-        transitionMatrix.put(2, 8, 0.5*Math.pow(dt, 2.0));
+        transitionMatrix.put(0, 6, 0.5 * Math.pow(dt, 2.0));
+        transitionMatrix.put(1, 7, 0.5 * Math.pow(dt, 2.0));
+        transitionMatrix.put(2, 8, 0.5 * Math.pow(dt, 2.0));
         // orientation
         transitionMatrix.put(9, 12, dt);
         transitionMatrix.put(10, 13, dt);
@@ -1609,9 +1655,9 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
         transitionMatrix.put(12, 15, dt);
         transitionMatrix.put(13, 16, dt);
         transitionMatrix.put(14, 17, dt);
-        transitionMatrix.put(9, 15, 0.5*Math.pow(dt, 2.0));
-        transitionMatrix.put(10, 16, 0.5*Math.pow(dt, 2.0));
-        transitionMatrix.put(11, 17, 0.5*Math.pow(dt, 2.0));
+        transitionMatrix.put(9, 15, 0.5 * Math.pow(dt, 2.0));
+        transitionMatrix.put(10, 16, 0.5 * Math.pow(dt, 2.0));
+        transitionMatrix.put(11, 17, 0.5 * Math.pow(dt, 2.0));
 
         Mat measurementMatrix = new Mat(nMeasurements, nStates, CvType.CV_64FC1);
 //       /* MEASUREMENT MODEL */
@@ -1668,10 +1714,24 @@ public class MainActivity extends ARActivity implements SensorEventListener  {
     public void updateKalmanFilter(KalmanFilter kf, Mat measurement, Mat translationEstimated, Mat rotationEstimated) {
         Mat prediction = kf.predict();
         Mat estimated = kf.correct(measurement);
-        translationEstimated.put(0,0, estimated.get(0,0));
-        translationEstimated.put(1,0, estimated.get(1,0));
-        translationEstimated.put(2,0, estimated.get(2,0));
-        float[] rotationEstimatedfloat =this.simpleRenderer.anglesToM(new float[]{(float)estimated.get(3,0)[0], (float)estimated.get(4,0)[1], (float)estimated.get(5,0)[2]});
+        translationEstimated.put(0, 0, estimated.get(0, 0));
+        translationEstimated.put(1, 0, estimated.get(1, 0));
+        translationEstimated.put(2, 0, estimated.get(2, 0));
+        float[] rotationEstimatedfloat = this.simpleRenderer.anglesToM(new float[]{(float) estimated.get(3, 0)[0], (float) estimated.get(4, 0)[1], (float) estimated.get(5, 0)[2]});
         // TODO: float[] to Mat
+    }
+
+    public int getCurrentLen() {
+        return currfreq;
+    //    return this.motionLen;
+    }
+
+    public int getCurrspeed() {
+        return currspeed;
+    }
+
+    public int getCurrentGes()  {
+      //  return Integer.parseInt(this.spinner.getSelectedItem().toString());
+        return 3;
     }
 }

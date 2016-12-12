@@ -377,10 +377,20 @@ public class SimpleRenderer extends ARRenderer  {
         gl.glPushMatrix();
         gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
 
+        cube.currlen = this.activity.getCurrentLen();
+
+        cube.currGes = this.activity.getCurrentGes();
+        cube.currspeed = this.activity.getCurrspeed();
+
         cube.draw(gl);
         gl.glPopMatrix();
 
         if (spinning) angle += 5.0f;
+    }
+
+    public void resetPeople() {
+        cube.count = 0;
+        cube.id = 0;
     }
 
     // test
