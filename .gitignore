@@ -6,3 +6,8 @@ base/build
 .externalNativeBuild
 
 openCVLibrary310/
+.idea/*
+local.properties
+
+.idea/encodings.xml
+Ble_fingerprint_java.iml
