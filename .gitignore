@@ -1,17 +1,8 @@
 *.a
-*.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+
+base/build
 .DS_Store
 /build
-/captures
 .externalNativeBuild
-*.so
 
-base/
-gradle/
-gradlew
-gradlew.bat
 openCVLibrary310/
