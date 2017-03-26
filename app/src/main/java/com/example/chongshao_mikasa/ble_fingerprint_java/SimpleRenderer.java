@@ -25,7 +25,8 @@ public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
   //  private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
-    private People cube = new People(40.0f, 0.0f, 0.0f, 20.0f);
+    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
+
 
     private float angle = 0.0f;
     private boolean spinning = false;
@@ -377,20 +378,20 @@ public class SimpleRenderer extends ARRenderer  {
         gl.glPushMatrix();
         gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
 
-        cube.currlen = this.activity.getCurrentLen();
+        guy.currlen = this.activity.getCurrentLen();
 
-        cube.currGes = this.activity.getCurrentGes();
-        cube.currspeed = this.activity.getCurrspeed();
+        guy.currGes = this.activity.getCurrentGes();
+        guy.currspeed = this.activity.getCurrspeed();
 
-        cube.draw(gl);
+        guy.draw(gl);
         gl.glPopMatrix();
 
         if (spinning) angle += 5.0f;
     }
 
     public void resetPeople() {
-        cube.count = 0;
-        cube.id = 0;
+        guy.count = 0;
+        guy.id = 0;
     }
 
     // test

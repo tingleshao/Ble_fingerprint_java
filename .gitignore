@@ -9,6 +9,6 @@ openCVLibrary310/
 openCVLibrary320/
 .idea/*
 local.properties
-
+.gradle/*
 .idea/encodings.xml
 Ble_fingerprint_java.iml
