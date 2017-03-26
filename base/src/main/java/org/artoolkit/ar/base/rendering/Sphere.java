@@ -50,58 +50,61 @@ import android.opengl.GLES10;
  */
 public class Sphere {
 
-    private FloatBuffer	mVertexBuffer;
-    private FloatBuffer	mColorBuffer;
-    private ByteBuffer	mIndexBuffer;
-    float colors[];
+    // XXX
+//    private FloatBuffer	mVertexBuffer;
+//    private FloatBuffer	mColorBuffer;
+//    private ByteBuffer	mIndexBuffer;
+//    float colors[];
+//
+//    public Sphere() {
+//        this(1.0f);
+//    }
+//
+//    public Sphere(float size) {
+//        this(size, 0.0f, 0.0f, 0.0f);
+//    }
+//
+//    public Sphere(float size, float x, float y, float z) {
+//        setArrays(size, x, y, z);
+//    }
+//
+//    public void setColors(float[] colors) {
+//        this.colors = colors;
+//        mColorBuffer = RenderUtils.buildFloatBuffer(colors);
+//
+//    }
+//
+// XXX
+//    public void setArrays(float size, float x, float y, float z) {
+//
+//        float hs = size / 2.0f;
+//
+//        float vertices[] = {
+//                x - hs, y - hs, z - hs, // 0
+//                x + hs, y - hs, z - hs, // 1
+//                x + hs, y + hs, z - hs, // 2
+//                x - hs, y + hs, z - hs, // 3
+//                x - hs, y - hs, z + hs, // 4
+//                x + hs, y - hs, z + hs, // 5
+//                x + hs, y + hs, z + hs, // 6
+//                x - hs, y + hs, z + hs, // 7
+//        };
 
-    public Sphere() {
-        this(1.0f);
-    }
-
-    public Sphere(float size) {
-        this(size, 0.0f, 0.0f, 0.0f);
-    }
-
-    public Sphere(float size, float x, float y, float z) {
-        setArrays(size, x, y, z);
-    }
-
-    public void setColors(float[] colors) {
-        this.colors = colors;
-        mColorBuffer = RenderUtils.buildFloatBuffer(colors);
-
-    }
-
-    public void setArrays(float size, float x, float y, float z) {
-
-        float hs = size / 2.0f;
-
-        float vertices[] = {
-                x - hs, y - hs, z - hs, // 0
-                x + hs, y - hs, z - hs, // 1
-                x + hs, y + hs, z - hs, // 2
-                x - hs, y + hs, z - hs, // 3
-                x - hs, y - hs, z + hs, // 4
-                x + hs, y - hs, z + hs, // 5
-                x + hs, y + hs, z + hs, // 6
-                x - hs, y + hs, z + hs, // 7
-        };
+//        if (colors == null) {
+//            float c = 1.0f;
+//            colors = new float[]{
+//                    0, 0, 0, c, // 0 black
+//                    c, 0, 0, c, // 1 red
+//                    c, c, 0, c, // 2 yellow
+//                    0, c, 0, c, // 3 green
+//                    0, 0, c, c, // 4 blue
+//                    c, 0, c, c, // 5 magenta
+//                    c, c, c, c, // 6 white
+//                    0, c, c, c, // 7 cyan
+//            };
+//        }
 
 
-        if (colors == null) {
-            float c = 1.0f;
-            colors = new float[]{
-                    0, 0, 0, c, // 0 black
-                    c, 0, 0, c, // 1 red
-                    c, c, 0, c, // 2 yellow
-                    0, c, 0, c, // 3 green
-                    0, 0, c, c, // 4 blue
-                    c, 0, c, c, // 5 magenta
-                    c, c, c, c, // 6 white
-                    0, c, c, c, // 7 cyan
-            };
-        }
 //		float colors[] = {
 //			0, 0, 0, c, // 0 black
 //				0, 0, 0, c, // 0 black
@@ -113,19 +116,20 @@ public class Sphere {
 //				0, 0, 0, c, // 0 black
 //		};
 
-        byte indices[] = {
-                0, 4, 5, 	0, 5, 1,
-                1, 5, 6, 	1, 6, 2,
-                2, 6, 7, 	2, 7, 3,
-                3, 7, 4, 	3, 4, 0,
-                4, 7, 6, 	4, 6, 5,
-                3, 0, 1, 	3, 1, 2
-        };
-
-        mVertexBuffer = RenderUtils.buildFloatBuffer(vertices);
-        mColorBuffer = RenderUtils.buildFloatBuffer(colors);
-        mIndexBuffer = RenderUtils.buildByteBuffer(indices);
-    }
+        // XXX
+//        byte indices[] = {
+//                0, 4, 5, 	0, 5, 1,
+//                1, 5, 6, 	1, 6, 2,
+//                2, 6, 7, 	2, 7, 3,
+//                3, 7, 4, 	3, 4, 0,
+//                4, 7, 6, 	4, 6, 5,
+//                3, 0, 1, 	3, 1, 2
+//        };
+//
+//        mVertexBuffer = RenderUtils.buildFloatBuffer(vertices);
+//        mColorBuffer = RenderUtils.buildFloatBuffer(colors);
+//        mIndexBuffer = RenderUtils.buildByteBuffer(indices);
+//    }
 
     public void draw(GL10 gl) {
 //
