@@ -20,6 +20,10 @@ public class People2 {
     private Cube head;
     private Cube lhand;
     private Cube rhand;
+
+    private Sphere ball = new Sphere();
+
+
     float lxs_clap_3_x[];
     float lxs_clap_3_y[];
     float rxs_clap_3_x[];
@@ -574,5 +578,6 @@ public class People2 {
         lhand.draw(unused);
         rhand.draw(unused);
         head.draw(unused);
+        ball.draw(unused);
     }
 }
