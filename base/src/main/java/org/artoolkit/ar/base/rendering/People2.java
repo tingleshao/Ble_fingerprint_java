@@ -156,7 +156,7 @@ public class People2 {
     }
 
     public People2(float size) {
-        this(size, 0.0f, 0.0f, 0.0f);
+        this(size, 0.0f, 0.0f, 20.0f);
     }
 
     public People2(float size, float x, float y, float z) {
@@ -170,17 +170,6 @@ public class People2 {
         float headx = 0f;
         float heady = 0f;
         float headz = 0f;
-
-        float lhandx = 0f;
-        float lhandy = 0f;
-        float lhandz = 0f;
-        float rhandx = 0f;
-        float rhandy = 0f;
-        float rhandz = 0f;
-
-        float bodyx = headx;
-        float bodyy = heady;
-        float bodyz = headz - 25f;
 
         body = new Rect(60.0f, 0.0f, -30.0f, -10.0f);
         lhand = new Cube(20.0f, -30.0f, -0.0f, 20.0f);
@@ -247,20 +236,7 @@ public class People2 {
                 c, c, c, c, // 6 white
                 0, c, c, c, // 7 cyan
         };
-//		float colors[] = {
-//			0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//				0, 0, 0, c, // 0 black
-//		};
 
-        //     mVertexBuffer = RenderUtils.buildFloatBuffer(vertices);
-        //    mColorBuffer = RenderUtils.buildFloatBuffer(colors);
-        //    mIndexBuffer = RenderUtils.buildByteBuffer(indices);
         lxs_clap_3_x = new float[] {-36.f, -22.5f, -25.3f};
         lxs_clap_3_y = new float[] {0.33f, -0f, -4.67f};
         rxs_clap_3_x = new float[] {37.f, 22.7f, 11.8f};

@@ -8,6 +8,7 @@ import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.artoolkit.ar.base.rendering.Arrow;
 import org.artoolkit.ar.base.rendering.Cube;
 import org.artoolkit.ar.base.rendering.People;
+import org.artoolkit.ar.base.rendering.People2;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -25,8 +26,8 @@ public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
   //  private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
-    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
-
+//    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
+    private People2 guy = new People2(40.0f, 0.0f, 0.0f, 20.0f);
 
     private float angle = 0.0f;
     private boolean spinning = false;
