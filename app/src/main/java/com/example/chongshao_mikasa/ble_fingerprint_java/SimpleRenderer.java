@@ -27,7 +27,7 @@ public class SimpleRenderer extends ARRenderer  {
 
   //  private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
 //    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
-    private People2 guy = new People2(40.0f, 0.0f, 0.0f, 20.0f);
+    private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
 
     private float angle = 0.0f;
     private boolean spinning = false;
@@ -114,10 +114,14 @@ public class SimpleRenderer extends ARRenderer  {
     public void reset() {
 
 
+    //    m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
+    //            0.0f, 1.0f, 0.0f, 0.0f,
+    //            0.0f, 0.0f, 1.0f, 0.0f,
+    //            -15.0f, -50.0f, -500.0f, 1.0f};
         m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
-                -15.0f, -50.0f, -500.0f, 1.0f};
+                -15.0f, -50.0f, -1000.0f, 1.0f};
      //   m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
      //           -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
      //           0.095246725f, -0.09202827f, 0.9911907f, 0.0f,

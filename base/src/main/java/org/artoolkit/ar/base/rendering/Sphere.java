@@ -56,9 +56,10 @@ public class Sphere {
 //    private ByteBuffer	mIndexBuffer;
 //    float colors[];
 //
-//    public Sphere() {
-//        this(1.0f);
-//    }
+    private float z;
+    public Sphere(float z) {
+        this.z = z;
+    }
 //
 //    public Sphere(float size) {
 //        this(size, 0.0f, 0.0f, 0.0f);
@@ -175,10 +176,10 @@ public class Sphere {
 
                 v[n][0] = (r2 * cos);
                 v[n][1] = (h2);
-                v[n][2] = (r2 * sin);
+                v[n][2] = (z+r2 * sin);
                 v[n+1][0] = (r1 * cos);
                 v[n+1][1] = (h1);
-                v[n+1][2] = (r1 * sin);
+                v[n+1][2] = (z+r1 * sin);
 
                 vBuf.put(v[n]);
                 vBuf.put(v[n+1]);

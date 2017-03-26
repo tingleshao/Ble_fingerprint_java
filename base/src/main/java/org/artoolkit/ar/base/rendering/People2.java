@@ -21,7 +21,7 @@ public class People2 {
     private Cube lhand;
     private Cube rhand;
 
-    private Sphere ball = new Sphere();
+    private Sphere ball;
 
 
     float lxs_clap_3_x[];
@@ -167,14 +167,11 @@ public class People2 {
 
     private void setArrays(float size, float x, float y, float z) {
 
-        float headx = 0f;
-        float heady = 0f;
-        float headz = 0f;
-
-        body = new Rect(60.0f, 0.0f, -30.0f, -10.0f);
-        lhand = new Cube(20.0f, -30.0f, -0.0f, 20.0f);
-        rhand = new Cube(20.0f, 30.0f, -0.0f, 20.0f);
-        head = new Cube(40.0f, 0.0f, 60.0f, -10.0f);
+        body = new Rect(60.0f, 0.0f, -30.0f, z+(-10.0f));
+        lhand = new Cube(20.0f, -30.0f, -0.0f, z+20.0f);
+        rhand = new Cube(20.0f, 30.0f, -0.0f, z+20.0f);
+        head = new Cube(40.0f, 0.0f, 60.0f, z+(-10.0f));
+        ball = new Sphere(z);
 
         float c = 1.0f;
 
@@ -429,7 +426,7 @@ public class People2 {
         count += 1;
         //  int currlen = 15;
         float[] currhands = lxs_clap_12_x;
-        int maxcount = 45/currlen;
+        int maxcount = 45 / currlen;
         if (currspeed == 1) {
             maxcount = maxcount / 2;
         }
@@ -544,16 +541,14 @@ public class People2 {
                     //    rhand.setArrays(20.0f, rxs_clap_15_x[id], rxs_clap_15_y[id], 15.0f);
                 }
             }
-
-
         }
         if (id == currlen-1) {
             id = 0;
         }
-        body.draw(unused);
-        lhand.draw(unused);
-        rhand.draw(unused);
-        head.draw(unused);
+     //   body.draw(unused);
+     ////   lhand.draw(unused);
+    //    rhand.draw(unused);
+    //    head.draw(unused);
         ball.draw(unused);
     }
 }
