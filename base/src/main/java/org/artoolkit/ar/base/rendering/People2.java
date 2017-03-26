@@ -156,7 +156,7 @@ public class People2 {
     }
 
     public People2(float size) {
-        this(size, 0.0f, 0.0f, 20.0f);
+        this(size, 0.0f, 0.0f, -1000.0f);
     }
 
     public People2(float size, float x, float y, float z) {
