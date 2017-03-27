@@ -87,6 +87,13 @@ import static org.opencv.imgcodecs.Imgcodecs.imdecode;
 import static org.opencv.imgproc.Imgproc.resize;
 
 
+
+// TODO: 0. Turn off object moving based on IMU
+// TODO: 1. make the sphere display with body
+// TODO: 2. make the sphere with face image mapping
+// TODO: 3. make the hand with rods
+
+
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 public class MainActivity extends ARActivity implements SensorEventListener {

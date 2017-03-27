@@ -20,8 +20,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        //    triangle = new Triangle();
-        //    square = new Square();
         rect = new Rectangle();
     }
     @Override
@@ -49,17 +47,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // When using GL_MODELVIEW, you must set the view point
         GLU.gluLookAt(gl, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
-        // Draw square
-        //   square.draw(gl);
-        // Create a rotation for the triangle
-
         // Use the following code to generate constant rotation.
         // Leave this code out when using TouchEvents.
         //     long time = SystemClock.uptimeMillis() % 4000L;
         //    float angle = 0.090f * ((int) time);
         gl.glRotatef(mAngle, 0.0f, 0.0f, 1.0f);
-        // Draw triangle
-        //     triangle.draw(gl);
         rect.draw(gl);
     }
 
