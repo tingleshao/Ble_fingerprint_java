@@ -50,7 +50,6 @@ import android.opengl.GLES10;
  */
 public class Sphere {
 
-    // XXX
 //    private FloatBuffer	mVertexBuffer;
 //    private FloatBuffer	mColorBuffer;
 //    private ByteBuffer	mIndexBuffer;
@@ -174,12 +173,12 @@ public class Sphere {
                 cos = (float)Math.cos(angleB * Math.PI / 180.0);
                 sin = -(float)Math.sin(angleB * Math.PI / 180.0);
 
-                v[n][0] = 50*(r2 * cos);
-                v[n][1] = 50*(h2);
-                v[n][2] = 50*(z+r2 * sin);
-                v[n+1][0] = 50*(r1 * cos);
-                v[n+1][1] = 50*(h1);
-                v[n+1][2] = 50*(z+r1 * sin);
+                v[n][0] = 35*(r2 * cos);
+                v[n][1] = 35*(h2);
+                v[n][2] = 35*(z+r2 * sin);
+                v[n+1][0] = 35*(r1 * cos);
+                v[n+1][1] = 35*(h1);
+                v[n+1][2] = 35*(z+r1 * sin);
 
                 vBuf.put(v[n]);
                 vBuf.put(v[n+1]);

@@ -5,9 +5,6 @@ import android.util.Log;
 
 import org.artoolkit.ar.base.ARToolKit;
 import org.artoolkit.ar.base.rendering.ARRenderer;
-import org.artoolkit.ar.base.rendering.Arrow;
-import org.artoolkit.ar.base.rendering.Cube;
-import org.artoolkit.ar.base.rendering.People;
 import org.artoolkit.ar.base.rendering.People2;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -25,7 +22,6 @@ import javax.microedition.khronos.opengles.GL10;
 public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
-  //  private Cube cube = new Cube(40.0f, 0.0f, 0.0f, 20.0f);
 //    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
     private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
 
@@ -48,7 +44,6 @@ public class SimpleRenderer extends ARRenderer  {
     public void setActivity(MainActivity activity) {
         this.activity = activity;
     }
-
 
 
     public SimpleRenderer() {
@@ -113,11 +108,11 @@ public class SimpleRenderer extends ARRenderer  {
 
     public void reset() {
 
-
     //    m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
     //            0.0f, 1.0f, 0.0f, 0.0f,
     //            0.0f, 0.0f, 1.0f, 0.0f,
     //            -15.0f, -50.0f, -500.0f, 1.0f};
+        // reset m matrix
         m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
@@ -165,10 +160,8 @@ public class SimpleRenderer extends ARRenderer  {
 
     @Override
     public boolean configureARScene() {
-
       //  markerID = ARToolKit.getInstance().addMarker("single;Data/patt.hiro;80");
       //  if (markerID < 0) return false;
-
         return true;
     }
 
@@ -378,7 +371,8 @@ public class SimpleRenderer extends ARRenderer  {
     //    }
 
     //    Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
-
+        // TODO: 03/26: temporaly disable object moving
+        reset();
         gl.glLoadMatrixf(m, 0);
         gl.glPushMatrix();
         gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
@@ -391,7 +385,8 @@ public class SimpleRenderer extends ARRenderer  {
         guy.draw(gl);
         gl.glPopMatrix();
 
-        if (spinning) angle += 5.0f;
+        // TODO 03/26: temporarly disable spinning
+         // if (spinning) angle += 5.0f;
     }
 
     public void resetPeople() {
