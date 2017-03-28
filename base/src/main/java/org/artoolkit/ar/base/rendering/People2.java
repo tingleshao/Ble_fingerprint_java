@@ -1,6 +1,8 @@
 package org.artoolkit.ar.base.rendering;
 
 
+import android.graphics.Bitmap;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -151,6 +153,8 @@ public class People2 {
     public int currGes;
     public int currlen;
     public int currspeed;
+    Bitmap bitmap;
+
     public People2() {
         this(1.0f);
     }
@@ -163,6 +167,18 @@ public class People2 {
         setArrays(size, x, y, z);
         currGes = 0;
         currlen = 3;
+    }
+
+    public People2(float size, float x, float y, float z, Bitmap bmp) {
+        setArrays(size, x, y, z);
+        currGes = 0;
+        currlen = 3;
+        this.bitmap = bmp;
+    }
+
+    public void setBitmap(Bitmap bmp) {
+        this.bitmap = bmp;
+        this.head.setBitmap(this.bitmap);
     }
 
     private void setArrays(float size, float x, float y, float z) {

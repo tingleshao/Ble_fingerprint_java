@@ -47,7 +47,7 @@ public class SimpleRenderer extends ARRenderer  {
         this.activity = activity;
     }
 
-    Bitmap texture;
+    Bitmap bitmap;
 
     int[] textures = new int[1];
 
@@ -112,8 +112,9 @@ public class SimpleRenderer extends ARRenderer  {
         Log.d("T", "angles: " + String.valueOf(angle1) + " " + String.valueOf(angle2) + " " + String.valueOf(angle3));
 
         // texture
-        texture = BitmapFactory.decodeResource(activity.getApplicationContext().getResources(),
+        bitmap = BitmapFactory.decodeResource(activity.getApplicationContext().getResources(),
                 R.drawable.bumpy_bricks_public_domain);
+        guy.setBitmap(bitmap);
     }
 
     public void reset() {
@@ -357,11 +358,7 @@ public class SimpleRenderer extends ARRenderer  {
 
     public void draw(GL10 gl) {
 
-        // texture
-        // Tell OpenGL to generate textures.
-        gl.glGenTextures(1, textures, 0);
-
-      //  this.drawCount += 1;
+        //  this.drawCount += 1;
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
         gl.glMatrixMode(GL10.GL_PROJECTION);
@@ -388,6 +385,7 @@ public class SimpleRenderer extends ARRenderer  {
     //    Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
         // TODO: 03/26: temporaly disable object moving
         reset();
+
         gl.glLoadMatrixf(m, 0);
         gl.glPushMatrix();
         gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);

@@ -38,20 +38,33 @@
 package org.artoolkit.ar.base.rendering;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES10;
+import android.opengl.GLUtils;
+
+import org.artoolkit.ar.base.R;
 
 /**
  * Simple class to render a coloured cube.
  */
 public class Cube {
-    
+
 	private FloatBuffer	mVertexBuffer;
     private FloatBuffer	mColorBuffer;
     private ByteBuffer	mIndexBuffer;
+
+	private FloatBuffer mTextureBuffer;
+
+	private Bitmap bitmap;
+	private int mTextureId = -1;
+	private boolean mShouldLoadTexture = true;
+	
 	float colors[];
     
     public Cube() {
@@ -66,10 +79,15 @@ public class Cube {
 		setArrays(size, x, y, z);
 	}
 
+	public void setBitmap(Bitmap bmp) {
+		mShouldLoadTexture = false;
+
+		this.bitmap = bmp;
+	}
+
 	public void setColors(float[] colors) {
 		this.colors = colors;
 		mColorBuffer = RenderUtils.buildFloatBuffer(colors);
-
 	}
 
 	public void setArrays(float size, float x, float y, float z) {
@@ -86,6 +104,45 @@ public class Cube {
 			x + hs, y + hs, z + hs, // 6
 			x - hs, y + hs, z + hs, // 7
 		};
+
+		float[] texturecoordinate =
+				{
+						// Front face
+						0.0f, 0.0f,
+						0.0f, 1.0f,
+						1.0f, 0.0f,
+						0.0f, 1.0f,
+
+						// Right face
+						0.0f, 0.0f,
+						0.0f, 1.0f,
+						1.0f, 0.0f,
+						0.0f, 1.0f,
+
+						// Back face
+						0.0f, 0.0f,
+						0.0f, 1.0f,
+						1.0f, 0.0f,
+						0.0f, 1.0f,
+
+						// Left face
+						0.0f, 0.0f,
+						0.0f, 1.0f,
+						1.0f, 0.0f,
+						0.0f, 1.0f,
+
+						// Top face
+						0.0f, 0.0f,
+						0.0f, 1.0f,
+						1.0f, 0.0f,
+						0.0f, 1.0f,
+
+						// Bottom face
+						0.0f, 0.0f,
+						0.0f, 1.0f,
+						1.0f, 0.0f,
+						0.0f, 1.0f,
+				};
 
 
 		if (colors == null) {
@@ -124,9 +181,55 @@ public class Cube {
 		mVertexBuffer = RenderUtils.buildFloatBuffer(vertices);
 		mColorBuffer = RenderUtils.buildFloatBuffer(colors);
 		mIndexBuffer = RenderUtils.buildByteBuffer(indices);
+
+
+		ByteBuffer byteBuf = ByteBuffer.allocateDirect(
+				texturecoordinate.length * 4);
+		byteBuf.order(ByteOrder.nativeOrder());
+		mTextureBuffer = byteBuf.asFloatBuffer();
+		mTextureBuffer.put(texturecoordinate);
+		mTextureBuffer.position(0);
     }
-    
-    public void draw(GL10 unused) {
+
+
+	private void loadGLTexture(GL10 gl) {
+		// Generate one texture pointer...
+		int[] textures = new int[1];
+		gl.glGenTextures(1, textures, 0);
+		mTextureId = textures[0];
+
+		// ...and bind it to our array
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureId);
+
+		// Create Nearest Filtered Texture
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER,
+				GL10.GL_LINEAR);
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER,
+				GL10.GL_LINEAR);
+
+		// Different possible texture parameters, e.g. GL10.GL_CLAMP_TO_EDGE
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S,
+				GL10.GL_CLAMP_TO_EDGE);
+		gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T,
+				GL10.GL_REPEAT);
+
+		// Use the Android GLUtils to specify a two-dimensional texture image
+		// from our bitmap
+		GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
+	}
+
+
+    public void draw(GL10 gl) {
+		// texture
+		// Tell OpenGL to generate textures.
+		gl.glEnable(GL10.GL_TEXTURE_2D);
+		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureId);
+
+
+		gl.glGenTextures(1, textures, 0);
+		gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
 
 		GLES10.glColorPointer(4, GLES10.GL_FLOAT, 0, mColorBuffer);
@@ -140,6 +243,8 @@ public class Cube {
 		GLES10.glDisableClientState(GLES10.GL_COLOR_ARRAY);
 		GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);
 
+		// textures
+		gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 	}
 
 }
