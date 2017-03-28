@@ -450,6 +450,11 @@ public class MainActivity extends ARActivity implements SensorEventListener {
         setContentView(R.layout.activity_main);
         simpleRenderer.setActivity(this);
 
+        // texture
+        Bitmap bitmap = BitmapFactory.decodeResource(this.getApplicationContext().getResources(),
+                R.drawable.bumpy_bricks_public_domain);
+        simpleRenderer.setBitmap(bitmap);
+
         mainLayout = (FrameLayout) this.findViewById(R.id.mainLayout);
         mainLayout2 = (FrameLayout) this.findViewById(R.id.mainLayout2);
         imageView = new ImageView(this);

@@ -562,8 +562,8 @@ public class People2 {
             id = 0;
         }
         body.draw(unused);
-        lhand.draw(unused);
-        rhand.draw(unused);
+    //    lhand.draw(unused);
+     //   rhand.draw(unused);
         head.draw(unused);
      //   ball.draw(unused);
     }

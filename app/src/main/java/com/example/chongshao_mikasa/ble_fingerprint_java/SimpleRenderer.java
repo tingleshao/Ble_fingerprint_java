@@ -111,9 +111,9 @@ public class SimpleRenderer extends ARRenderer  {
         angle3 = radToDegree(angles[2]);
         Log.d("T", "angles: " + String.valueOf(angle1) + " " + String.valueOf(angle2) + " " + String.valueOf(angle3));
 
-        // texture
-        bitmap = BitmapFactory.decodeResource(activity.getApplicationContext().getResources(),
-                R.drawable.bumpy_bricks_public_domain);
+    }
+
+    public void setBitmap(Bitmap bitmap) {
         guy.setBitmap(bitmap);
     }
 

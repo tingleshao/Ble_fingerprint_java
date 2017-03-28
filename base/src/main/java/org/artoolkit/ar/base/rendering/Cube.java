@@ -80,7 +80,7 @@ public class Cube {
 	}
 
 	public void setBitmap(Bitmap bmp) {
-		mShouldLoadTexture = false;
+		mShouldLoadTexture = true;
 
 		this.bitmap = bmp;
 	}
