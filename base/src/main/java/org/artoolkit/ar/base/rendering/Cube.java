@@ -64,7 +64,7 @@ public class Cube {
 	private Bitmap bitmap;
 	private int mTextureId = -1;
 	private boolean mShouldLoadTexture = true;
-	
+
 	float colors[];
     
     public Cube() {
@@ -221,16 +221,17 @@ public class Cube {
 
     public void draw(GL10 gl) {
 		// texture
+
 		// Tell OpenGL to generate textures.
+		if (mShouldLoadTexture) {
+			loadGLTexture(gl);
+			mShouldLoadTexture = false;
+		}
+
 		gl.glEnable(GL10.GL_TEXTURE_2D);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
 		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureId);
-
-
-		gl.glGenTextures(1, textures, 0);
-		gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
-
 
 		GLES10.glColorPointer(4, GLES10.GL_FLOAT, 0, mColorBuffer);
 		GLES10.glVertexPointer(3, GLES10.GL_FLOAT, 0, mVertexBuffer);
