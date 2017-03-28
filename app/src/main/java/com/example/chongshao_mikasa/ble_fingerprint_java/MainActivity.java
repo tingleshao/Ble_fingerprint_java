@@ -79,7 +79,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.video.KalmanFilter;
 import org.w3c.dom.Text;
 
-import static org.opencv.core.Core.max;
 import static org.opencv.core.Core.norm;
 import static org.opencv.core.Core.normalize;
 import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
