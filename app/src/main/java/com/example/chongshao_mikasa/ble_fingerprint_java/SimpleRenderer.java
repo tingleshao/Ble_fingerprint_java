@@ -1,5 +1,7 @@
 package com.example.chongshao_mikasa.ble_fingerprint_java;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -44,6 +46,10 @@ public class SimpleRenderer extends ARRenderer  {
     public void setActivity(MainActivity activity) {
         this.activity = activity;
     }
+
+    Bitmap texture;
+
+    int[] textures = new int[1];
 
 
     public SimpleRenderer() {
@@ -104,6 +110,10 @@ public class SimpleRenderer extends ARRenderer  {
         angle2 = radToDegree(angles[1]);
         angle3 = radToDegree(angles[2]);
         Log.d("T", "angles: " + String.valueOf(angle1) + " " + String.valueOf(angle2) + " " + String.valueOf(angle3));
+
+        // texture
+        texture = BitmapFactory.decodeResource(activity.getApplicationContext().getResources(),
+                R.drawable.bumpy_bricks_public_domain);
     }
 
     public void reset() {
@@ -346,6 +356,11 @@ public class SimpleRenderer extends ARRenderer  {
     }
 
     public void draw(GL10 gl) {
+
+        // texture
+        // Tell OpenGL to generate textures.
+        gl.glGenTextures(1, textures, 0);
+
       //  this.drawCount += 1;
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
