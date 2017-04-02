@@ -1,6 +1,7 @@
 package org.artoolkit.ar.base.rendering;
 
 import android.opengl.GLES10;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -101,6 +102,12 @@ public class Rect {
         GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
 
         GLES10.glDrawElements(GLES10.GL_TRIANGLES, 36, GLES10.GL_UNSIGNED_BYTE, mIndexBuffer);
+//           for (int i = 0; i < mVertexBuffer.limit(); i++) {
+//               Log.d("DDL", "mVertexBuffer:" + String.valueOf(mVertexBuffer.get(i)));
+//           }
+//        for (int i = 0; i < mIndexBuffer.limit(); i++) {
+//            Log.d("DDL", "mIndexBuffer:" + String.valueOf(mIndexBuffer.get(i)));
+//        }
 
         GLES10.glDisableClientState(GLES10.GL_COLOR_ARRAY);
         GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);

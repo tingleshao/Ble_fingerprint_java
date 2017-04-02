@@ -37,6 +37,8 @@ public class Model {
     private ArrayList<Face> faces;
     private int vertexCount;
 
+    int i = 0;
+
     private ArrayList<GroupObject> groupObjects;
 
     class Vector3D {
@@ -186,12 +188,30 @@ public class Model {
                     groupObjects.add(groupObject);
                 }
             }
-
+            float size = 40.0f;
+            float hs = size / 2.0f;
+            float x = 0.0f;
+            float y = 60.0f;
+            float z = -200.0f;
+            float vertices[] = {
+                    x - hs, y - hs, z - hs, // 0
+                    x + hs, y - hs, z - hs, // 1
+                    x + hs, y + hs, z - hs, // 2
+                    x - hs, y + hs, z - hs, // 3
+                    x - hs, y - hs, z + hs, // 4
+                    x + hs, y - hs, z + hs, // 5
+                    x + hs, y + hs, z + hs, // 6
+                    x - hs, y + hs, z + hs, // 7
+            };
             if (CommandBlock.equals("v")) {
-                Vector3D vertex = new Vector3D(Float.parseFloat(Blocks[1]),
-                        Float.parseFloat(Blocks[2]),
-                        Float.parseFloat(Blocks[3]));
-                this.vertices.add(vertex);
+        //        Vector3D vertex = new Vector3D(Float.parseFloat(Blocks[1]),
+        //                Float.parseFloat(Blocks[2])+100.0f,
+        //                Float.parseFloat(Blocks[3])-200.0f);
+                Log.d("DDL", "i: " + String.valueOf(i) );
+                this.vertices.add(new Vector3D(vertices[i*3], vertices[i*3+1], vertices[i*3+2]));
+                i = i+1;
+                if (i == 8) {
+            i = 0;}
                 // Log.d("VERTEX DATA", " " + vertex.getX() + ", " +
                 // vertex.getY() + ", " + vertex.getZ());
             }
@@ -224,9 +244,9 @@ public class Model {
 
                     face.getVertices()
                             .add(this.vertices.get(Integer
-                                    .parseInt(faceParams[0]) - 1));
+                                    .parseInt(faceParams[0].trim()) - 1));
 
-                    if (faceParams[1] == "") {
+                    if (faceParams.length == 1 ||  faceParams[1] == "") {
                     } else {
                         face.getUvws().add(
                                 this.vertexTexture.get(Integer
@@ -318,23 +338,25 @@ public class Model {
             tempV[i * 9 + 7] = face.getVertices().get(2).getY();
             tempV[i * 9 + 8] = face.getVertices().get(2).getZ();
 
-            tempVn[i * 9] = face.getNormals().get(0).getX();
-            tempVn[i * 9 + 1] = face.getNormals().get(0).getY();
-            tempVn[i * 9 + 2] = face.getNormals().get(0).getZ();
-            tempVn[i * 9 + 3] = face.getNormals().get(1).getX();
-            tempVn[i * 9 + 4] = face.getNormals().get(1).getY();
-            tempVn[i * 9 + 5] = face.getNormals().get(1).getZ();
-            tempVn[i * 9 + 6] = face.getNormals().get(2).getX();
-            tempVn[i * 9 + 7] = face.getNormals().get(2).getY();
-            tempVn[i * 9 + 8] = face.getNormals().get(2).getZ();
-
-            tempVt[i * 6] = face.getUvws().get(0).getX();
-            tempVt[i * 6 + 1] = face.getUvws().get(0).getY();
-            tempVt[i * 6 + 2] = face.getUvws().get(1).getX();
-            tempVt[i * 6 + 3] = face.getUvws().get(1).getY();
-            tempVt[i * 6 + 4] = face.getUvws().get(2).getX();
-            tempVt[i * 6 + 5] = face.getUvws().get(2).getY();
-
+            if (face.getNormals().size() > 0) {
+                tempVn[i * 9] = face.getNormals().get(0).getX();
+                tempVn[i * 9 + 1] = face.getNormals().get(0).getY();
+                tempVn[i * 9 + 2] = face.getNormals().get(0).getZ();
+                tempVn[i * 9 + 3] = face.getNormals().get(1).getX();
+                tempVn[i * 9 + 4] = face.getNormals().get(1).getY();
+                tempVn[i * 9 + 5] = face.getNormals().get(1).getZ();
+                tempVn[i * 9 + 6] = face.getNormals().get(2).getX();
+                tempVn[i * 9 + 7] = face.getNormals().get(2).getY();
+                tempVn[i * 9 + 8] = face.getNormals().get(2).getZ();
+            }
+            if (face.getUvws().size() > 0) {
+                tempVt[i * 6] = face.getUvws().get(0).getX();
+                tempVt[i * 6 + 1] = face.getUvws().get(0).getY();
+                tempVt[i * 6 + 2] = face.getUvws().get(1).getX();
+                tempVt[i * 6 + 3] = face.getUvws().get(1).getY();
+                tempVt[i * 6 + 4] = face.getUvws().get(2).getX();
+                tempVt[i * 6 + 5] = face.getUvws().get(2).getY();
+            }
             indices[i * 3] = (short) (i * 3);
             indices[i * 3 + 1] = (short) (i * 3 + 1);
             indices[i * 3 + 2] = (short) (i * 3 + 2);

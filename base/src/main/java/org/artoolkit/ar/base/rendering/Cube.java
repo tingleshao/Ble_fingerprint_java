@@ -47,6 +47,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES10;
 import android.opengl.GLUtils;
+import android.util.Log;
 
 import org.artoolkit.ar.base.R;
 
@@ -221,30 +222,44 @@ public class Cube {
     public void draw(GL10 gl) {
 		// texture
 
-		// Tell OpenGL to generate textures.
-		if (mShouldLoadTexture) {
-			loadGLTexture(gl);
-			mShouldLoadTexture = false;
+			// Tell OpenGL to generate textures.
+			if (mShouldLoadTexture) {
+				loadGLTexture(gl);
+				mShouldLoadTexture = false;
+			}
+
+			gl.glEnable(GL10.GL_TEXTURE_2D);
+			gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+		    gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
+	    	gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureId);
+
+			GLES10.glColorPointer(4, GLES10.GL_FLOAT, 0, mColorBuffer);
+			GLES10.glVertexPointer(3, GLES10.GL_FLOAT, 0, mVertexBuffer);
+
+			GLES10.glEnableClientState(GLES10.GL_COLOR_ARRAY);
+			GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
+
+			Log.d("DDL", "Vertex Buffer:" + mVertexBuffer.toString());
+			Log.d("DDL", "index Buffer:" + mIndexBuffer.toString());
+		for (int i = 0; i < mVertexBuffer.limit(); i++) {
+			Log.d("DDL", "LIMIT" + String.valueOf(mVertexBuffer.limit()));
+
+			Log.d("DDL", "mVertexBuffer:" + String.valueOf(mVertexBuffer.get(i)));
+		}
+		for (int i = 0; i < mIndexBuffer.limit(); i++) {
+			Log.d("DDL", "LIMIT" + String.valueOf(mIndexBuffer.limit()));
+
+			Log.d("DDL", "mIndexBuffer:" + String.valueOf(mIndexBuffer.get(i)));
 		}
 
-		gl.glEnable(GL10.GL_TEXTURE_2D);
-		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
-		gl.glBindTexture(GL10.GL_TEXTURE_2D, mTextureId);
+			//	gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, mVertexBuffer.limit());
+			GLES10.glDrawElements(GLES10.GL_TRIANGLES, 36, GLES10.GL_UNSIGNED_BYTE, mIndexBuffer);
 
-		GLES10.glColorPointer(4, GLES10.GL_FLOAT, 0, mColorBuffer);
-		GLES10.glVertexPointer(3, GLES10.GL_FLOAT, 0, mVertexBuffer);
+			GLES10.glDisableClientState(GLES10.GL_COLOR_ARRAY);
+			GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);
 
-		GLES10.glEnableClientState(GLES10.GL_COLOR_ARRAY);
-		GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
-
-		GLES10.glDrawElements(GLES10.GL_TRIANGLES, 36, GLES10.GL_UNSIGNED_BYTE, mIndexBuffer);
-
-		GLES10.glDisableClientState(GLES10.GL_COLOR_ARRAY);
-		GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);
-
-		// textures
-		gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+			// textures
+			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 	}
 
 }

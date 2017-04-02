@@ -1177,7 +1177,8 @@ public class MainActivity extends ARActivity implements SensorEventListener {
 
                 long stopTime = System.currentTimeMillis();
                 long elapsedTime = stopTime - startTime;
-                Log.d("T", "IMU time:" + String.valueOf(elapsedTime));
+                // TODO: chong temp disable this
+            //    Log.d("T", "IMU time:" + String.valueOf(elapsedTime));
                 float[] angles = MainActivity.this.simpleRenderer.getCameraAngles();
                 this.imuAngle.setText(String.valueOf(angles[0]) + " " + String.valueOf(angles[1]) + " " + String.valueOf(angles[2]));
 
