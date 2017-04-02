@@ -1,9 +1,8 @@
-package com.example.chongshao_mikasa.ble_fingerprint_java;
+package org.artoolkit.ar.base.rendering;
 
 import android.content.Context;
 import android.util.Log;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -102,6 +101,17 @@ public class Model {
     private Context context;
     private int modelID;
 
+    public Model() {
+
+        this.vertices = new ArrayList<Vector3D>();
+        this.vertexTexture = new ArrayList<Vector3D>();
+        this.vertexNormal = new ArrayList<Vector3D>();
+        this.faces = new ArrayList<Face>();
+
+        this.groupObjects = new ArrayList<GroupObject>();
+    }
+
+
     public Model(int modelID, Context activity) {
         this.vertices = new ArrayList<Vector3D>();
         this.vertexTexture = new ArrayList<Vector3D>();
@@ -112,8 +122,16 @@ public class Model {
 
         this.modelID = modelID;
         this.context = activity;
-
         loadFile();
+
+    }
+
+    public void setModel(int modelID, Context activity) {
+
+        this.modelID = modelID;
+        this.context = activity;
+        loadFile();
+
     }
 
     private int loadFile() {

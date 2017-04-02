@@ -1,13 +1,12 @@
 package com.example.chongshao_mikasa.ble_fingerprint_java;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import org.artoolkit.ar.base.ARToolKit;
 import org.artoolkit.ar.base.rendering.ARRenderer;
-import org.artoolkit.ar.base.rendering.People2;
+import org.artoolkit.ar.base.rendering.People3;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -25,7 +24,9 @@ public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
 //    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
-    private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
+  //  private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
+
+    private People3 guy = new People3();
 
     private float angle = 0.0f;
     private boolean spinning = false;
@@ -358,6 +359,7 @@ public class SimpleRenderer extends ARRenderer  {
 
     public void draw(GL10 gl) {
 
+        guy.setModel(R.raw.box, activity);
         //  this.drawCount += 1;
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
