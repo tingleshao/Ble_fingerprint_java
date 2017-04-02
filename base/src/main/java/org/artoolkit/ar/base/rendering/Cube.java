@@ -182,7 +182,6 @@ public class Cube {
 		mColorBuffer = RenderUtils.buildFloatBuffer(colors);
 		mIndexBuffer = RenderUtils.buildByteBuffer(indices);
 
-
 		ByteBuffer byteBuf = ByteBuffer.allocateDirect(
 				texturecoordinate.length * 4);
 		byteBuf.order(ByteOrder.nativeOrder());
