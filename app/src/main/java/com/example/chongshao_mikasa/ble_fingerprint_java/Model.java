@@ -15,8 +15,8 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
-public class Model {
 
+public class Model {
     // Constants
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int SHORT_SIZE_BYTES = 2;
@@ -41,7 +41,6 @@ public class Model {
     private ArrayList<GroupObject> groupObjects;
 
     class Vector3D {
-
         float x, y, z;
 
         public Vector3D(float parseFloat, float parseFloat2, float parseFloat3) {
@@ -64,9 +63,6 @@ public class Model {
 
             return z;
         }
-
-
-
     }
 
     class Face {
