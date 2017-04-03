@@ -22,10 +22,10 @@ public class Model {
 
     private FloatBuffer _vb;
     private FloatBuffer _nb;
-    private ShortBuffer _ib;
+    private ByteBuffer _ib;
     private FloatBuffer _tcb;
 
-    private short[] indices;
+    private byte[] indices;
 
     private float[] tempV;
     private float[] tempVt;
@@ -204,14 +204,15 @@ public class Model {
                     x - hs, y + hs, z + hs, // 7
             };
             if (CommandBlock.equals("v")) {
-        //        Vector3D vertex = new Vector3D(Float.parseFloat(Blocks[1]),
-        //                Float.parseFloat(Blocks[2])+100.0f,
-        //                Float.parseFloat(Blocks[3])-200.0f);
-                Log.d("DDL", "i: " + String.valueOf(i) );
-                this.vertices.add(new Vector3D(vertices[i*3], vertices[i*3+1], vertices[i*3+2]));
-                i = i+1;
-                if (i == 8) {
-            i = 0;}
+                Vector3D vertex = new Vector3D(Float.parseFloat(Blocks[1]),
+                        Float.parseFloat(Blocks[2])+100.0f,
+                        Float.parseFloat(Blocks[3])-200.0f);
+                this.vertices.add(vertex);
+          //      Log.d("DDL", "i: " + String.valueOf(i) );
+           //     this.vertices.add(new Vector3D(vertices[i*3], vertices[i*3+1], vertices[i*3+2]));
+         //       i = i+1;
+          //      if (i == 8) {
+         //   i = 0;}
                 // Log.d("VERTEX DATA", " " + vertex.getX() + ", " +
                 // vertex.getY() + ", " + vertex.getZ());
             }
@@ -275,7 +276,7 @@ public class Model {
 
         tempV = new float[facesSize * 3 * 3];
         tempVt = new float[facesSize * 2 * 3];
-        indices = new short[facesSize * 3];
+        indices = new byte[facesSize * 3];
 
         for (int i = 0; i < facesSize; i++) {
             Face face = faces.get(i);
@@ -294,25 +295,25 @@ public class Model {
             tempVt[i * 6 + 3] = face.getUvws().get(1).getY();
             tempVt[i * 6 + 4] = face.getUvws().get(2).getX();
             tempVt[i * 6 + 5] = face.getUvws().get(2).getY();
-            indices[i * 3] = (short) (i * 3);
-            indices[i * 3 + 1] = (short) (i * 3 + 1);
-            indices[i * 3 + 2] = (short) (i * 3 + 2);
+            indices[i * 3] = (byte) (i * 3);
+            indices[i * 3 + 1] = (byte) (i * 3 + 1);
+            indices[i * 3 + 2] = (byte) (i * 3 + 2);
         }
 
-        _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        _vb.put(tempV);
-        _vb.position(0);
+    //    _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
+     //           .order(ByteOrder.nativeOrder()).asFloatBuffer();
+   //     _vb.put(tempV);
+    //    _vb.position(0);
 
         _tcb = ByteBuffer.allocateDirect(tempVt.length * FLOAT_SIZE_BYTES)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
         _tcb.put(tempVt);
         _tcb.position(0);
 
-        _ib = ByteBuffer.allocateDirect(indices.length * SHORT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asShortBuffer();
-        _ib.put(indices);
-        _ib.position(0);
+   //     _ib = ByteBuffer.allocateDirect(indices.length * SHORT_SIZE_BYTES)
+           //     .order(ByteOrder.nativeOrder()).asShortBuffer();
+    //    _ib.put(indices);
+    //    _ib.position(0);
     }
 
     private void fillInBuffersWithNormals() {
@@ -324,7 +325,7 @@ public class Model {
         tempV = new float[facesSize * 3 * 3];
         tempVt = new float[facesSize * 2 * 3];
         tempVn = new float[facesSize * 3 * 3];
-        indices = new short[facesSize * 3];
+        indices = new byte[facesSize * 3];
 
         for (int i = 0; i < facesSize; i++) {
             Face face = faces.get(i);
@@ -357,15 +358,18 @@ public class Model {
                 tempVt[i * 6 + 4] = face.getUvws().get(2).getX();
                 tempVt[i * 6 + 5] = face.getUvws().get(2).getY();
             }
-            indices[i * 3] = (short) (i * 3);
-            indices[i * 3 + 1] = (short) (i * 3 + 1);
-            indices[i * 3 + 2] = (short) (i * 3 + 2);
+            indices[i * 3] = (byte) (i * 3);
+            indices[i * 3 + 1] = (byte) (i * 3 + 1);
+            indices[i * 3 + 2] = (byte) (i * 3 + 2);
         }
 
-        _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        _vb.put(tempV);
-        _vb.position(0);
+     //   _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
+     //           .order(ByteOrder.nativeOrder()).asFloatBuffer();
+     //   _vb.put(tempV);
+     //   _vb.position(0);
+
+        _vb = RenderUtils.buildFloatBuffer(tempV);
+
 
         _tcb = ByteBuffer.allocateDirect(tempVt.length * FLOAT_SIZE_BYTES)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -377,10 +381,11 @@ public class Model {
         _nb.put(tempVn);
         _nb.position(0);
 
-        _ib = ByteBuffer.allocateDirect(indices.length * SHORT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asShortBuffer();
-        _ib.put(indices);
-        _ib.position(0);
+   //     _ib = ByteBuffer.allocateDirect(indices.length * SHORT_SIZE_BYTES)
+    //            .order(ByteOrder.nativeOrder()).asShortBuffer();
+    //    _ib.put(indices);
+    //    _ib.position(0);
+        _ib =  RenderUtils.buildByteBuffer(indices);
     }
 
     public FloatBuffer getVertices() {
@@ -391,7 +396,7 @@ public class Model {
         return _tcb;
     }
 
-    public ShortBuffer getIndices() {
+    public ByteBuffer getIndices() {
         return _ib;
     }
 

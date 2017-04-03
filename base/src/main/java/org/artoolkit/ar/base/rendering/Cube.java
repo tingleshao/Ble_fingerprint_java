@@ -248,7 +248,6 @@ public class Cube {
 		}
 		for (int i = 0; i < mIndexBuffer.limit(); i++) {
 			Log.d("DDL", "LIMIT" + String.valueOf(mIndexBuffer.limit()));
-
 			Log.d("DDL", "mIndexBuffer:" + String.valueOf(mIndexBuffer.get(i)));
 		}
 
