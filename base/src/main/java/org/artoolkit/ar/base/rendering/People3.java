@@ -130,14 +130,14 @@ public class People3 {
     // gl.glNormal3f(0, 0, 1);
      //   gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, mVertexBuffer.limit());
 
-        GLES10.glDrawElements(GLES10.GL_TRIANGLES, 36, GLES10.GL_UNSIGNED_BYTE, mIndexBuffer);
-        mVertexBuffer = (FloatBuffer)mVertexBuffer.limit(24);
+        GLES10.glDrawElements(GLES10.GL_TRIANGLES, mIndexBuffer.limit(), GLES10.GL_UNSIGNED_BYTE, mIndexBuffer);
+   //     mVertexBuffer = (FloatBuffer)mVertexBuffer.limit(24);
         for (int i = 0; i < mVertexBuffer.limit(); i++) {
-            Log.d("DDL", "LIMIT" + String.valueOf(mVertexBuffer.limit()));
+            Log.d("DDL", "LIMIT" + String.valueOf(mVertexBuffer.limit()) + " " + String.valueOf(i));
             Log.d("DDL", "mVertexBuffer:" + String.valueOf(mVertexBuffer.get(i)));
         }
         for (int i = 0; i < mIndexBuffer.limit(); i++) {
-            Log.d("DDL", "LIMIT" + String.valueOf(mIndexBuffer.limit()));
+            Log.d("DDL", "LIMIT" + String.valueOf(mIndexBuffer.limit())  + " " + String.valueOf(i));
             Log.d("DDL", "mIndexBuffer:" + String.valueOf(mIndexBuffer.get(i)));
         }
 

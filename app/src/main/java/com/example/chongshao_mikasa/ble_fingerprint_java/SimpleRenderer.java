@@ -25,7 +25,7 @@ public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
 //    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
- //   private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
+  //  private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
 
     private People3 guy = new People3();
 
@@ -361,7 +361,7 @@ public class SimpleRenderer extends ARRenderer  {
 
     public void draw(GL10 gl) {
        if (!setModeled) {
-           guy.setModel(R.raw.box, activity);
+          guy.setModel(R.raw.tinker, activity);
            setModeled = true;
        }
         //  this.drawCount += 1;
@@ -405,7 +405,7 @@ public class SimpleRenderer extends ARRenderer  {
         gl.glPopMatrix();
 
         // TODO 03/26: temporarly disable spinning
-         // if (spinning) angle += 5.0f;
+          if (spinning) angle += 5.0f;
     }
 
     public void resetPeople() {

@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -31,10 +32,12 @@ public class Model {
     private float[] tempVt;
     private float[] tempVn;
 
+    private ArrayList<Float> verticesNew;
     private ArrayList<Vector3D> vertices;
     private ArrayList<Vector3D> vertexTexture;
     private ArrayList<Vector3D> vertexNormal;
     private ArrayList<Face> faces;
+    private ArrayList<Integer> facesNew;
     private int vertexCount;
 
     int i = 0;
@@ -111,6 +114,9 @@ public class Model {
         this.faces = new ArrayList<Face>();
 
         this.groupObjects = new ArrayList<GroupObject>();
+
+        this.verticesNew = new ArrayList<>();
+        this.facesNew = new ArrayList<>();
     }
 
 
@@ -144,7 +150,8 @@ public class Model {
                 inputStream));
 
         try {
-            loadOBJ(in);
+         //   loadOBJ(in);
+            loadOBJnew(in);
             Log.d("LOADING FILE", "FILE LOADED SUCESSFULLY====================");
         } catch (IOException e) {
             e.printStackTrace();
@@ -158,6 +165,95 @@ public class Model {
 
         return 1;
     }
+
+
+    private void loadOBJnew(BufferedReader in) throws IOException {
+        Log.d("LOADING FILE", "STARTING!====================");
+    //    GroupObject defaultObject = new GroupObject();
+     //   GroupObject currentObject = defaultObject;
+
+     //   this.groupObjects.add(defaultObject);
+
+        String Line; // Stores ever line we read!
+        String[] Blocks; // Stores string fragments after the split!!
+        String CommandBlock; // Stores Command Blocks such as: v, vt, vn, g,
+        // etc...
+
+        while ((Line = in.readLine()) != null) {
+            Blocks = Line.split(" +");
+            CommandBlock = Blocks[0];
+
+            // Log.d("COMMAND BLOCK" , "---------- " + CommandBlock +
+            // " ----------");
+
+//            if (CommandBlock.equals("g")) {
+//                if (Blocks[1] == "default")
+//                    currentObject = defaultObject;
+//                else {
+//                    GroupObject groupObject = new GroupObject();
+//                    groupObject.setObjectName(Blocks[1]);
+//                    currentObject = groupObject;
+//                    groupObjects.add(groupObject);
+//                }
+//            }
+            float size = 40.0f;
+            float hs = size / 2.0f;
+            float x = 0.0f;
+            float y = 60.0f;
+            float z = -200.0f;
+//            float vertices[] = {
+//                    x - hs, y - hs, z - hs, // 0
+//                    x + hs, y - hs, z - hs, // 1
+//                    x + hs, y + hs, z - hs, // 2
+//                    x - hs, y + hs, z - hs, // 3
+//                    x - hs, y - hs, z + hs, // 4
+//                    x + hs, y - hs, z + hs, // 5
+//                    x + hs, y + hs, z + hs, // 6
+//                    x - hs, y + hs, z + hs, // 7
+//            };
+            if (CommandBlock.equals("v")) {
+         //       Vector3D vertex = new Vector3D(Float.parseFloat(Blocks[1]),
+        //                Float.parseFloat(Blocks[2]),
+          //              Float.parseFloat(Blocks[3])-200.0f);
+                this.verticesNew.add(Float.parseFloat(Blocks[1].trim()));
+                this.verticesNew.add(Float.parseFloat(Blocks[2].trim()));
+                this.verticesNew.add(Float.parseFloat(Blocks[3].trim())-200.0f);
+
+                //      Log.d("DDL", "i: " + String.valueOf(i) );
+                //     this.vertices.add(new Vector3D(vertices[i*3], vertices[i*3+1], vertices[i*3+2]));
+                //       i = i+1;
+                //      if (i == 8) {
+                //   i = 0;}
+                // Log.d("VERTEX DATA", " " + vertex.getX() + ", " +
+                // vertex.getY() + ", " + vertex.getZ());
+            }
+
+            if (CommandBlock.equals("f")) {
+
+                if (Blocks.length == 4) {
+                    this.facesNew.add(Integer.parseInt(Blocks[1].trim()) - 1);
+                    this.facesNew.add(Integer.parseInt(Blocks[2].trim()) - 1);
+                    this.facesNew.add(Integer.parseInt(Blocks[3].trim()) - 1);
+                }
+                else if (Blocks.length == 5) {
+                    this.facesNew.add(Integer.parseInt(Blocks[1].split("/")[0].trim()) - 1);
+                    this.facesNew.add(Integer.parseInt(Blocks[2].split("/")[0].trim()) - 1);
+                    this.facesNew.add(Integer.parseInt(Blocks[3].split("/")[0].trim()) - 1);
+
+                    this.facesNew.add(Integer.parseInt(Blocks[2].split("/")[0].trim()) - 1);
+                    this.facesNew.add(Integer.parseInt(Blocks[3].split("/")[0].trim()) - 1);
+                    this.facesNew.add(Integer.parseInt(Blocks[4].split("/")[0].trim()) - 1);
+                }
+            }
+        }
+
+        // fillInBuffers();
+        fillInBuffersWithNormalsNew();
+
+        Log.d("OBJ OBJECT DATA", "V = " + vertices.size() + " VN = "
+                + vertexTexture.size() + " VT = " + vertexNormal.size());
+    }
+
 
     private void loadOBJ(BufferedReader in) throws IOException {
         Log.d("LOADING FILE", "STARTING!====================");
@@ -193,19 +289,19 @@ public class Model {
             float x = 0.0f;
             float y = 60.0f;
             float z = -200.0f;
-            float vertices[] = {
-                    x - hs, y - hs, z - hs, // 0
-                    x + hs, y - hs, z - hs, // 1
-                    x + hs, y + hs, z - hs, // 2
-                    x - hs, y + hs, z - hs, // 3
-                    x - hs, y - hs, z + hs, // 4
-                    x + hs, y - hs, z + hs, // 5
-                    x + hs, y + hs, z + hs, // 6
-                    x - hs, y + hs, z + hs, // 7
-            };
+//            float vertices[] = {
+//                    x - hs, y - hs, z - hs, // 0
+//                    x + hs, y - hs, z - hs, // 1
+//                    x + hs, y + hs, z - hs, // 2
+//                    x - hs, y + hs, z - hs, // 3
+//                    x - hs, y - hs, z + hs, // 4
+//                    x + hs, y - hs, z + hs, // 5
+//                    x + hs, y + hs, z + hs, // 6
+//                    x - hs, y + hs, z + hs, // 7
+//            };
             if (CommandBlock.equals("v")) {
                 Vector3D vertex = new Vector3D(Float.parseFloat(Blocks[1]),
-                        Float.parseFloat(Blocks[2])+100.0f,
+                        Float.parseFloat(Blocks[2]),
                         Float.parseFloat(Blocks[3])-200.0f);
                 this.vertices.add(vertex);
           //      Log.d("DDL", "i: " + String.valueOf(i) );
@@ -316,6 +412,22 @@ public class Model {
     //    _ib.position(0);
     }
 
+
+    private void fillInBuffersWithNormalsNew() {
+        float[] verticesNewArray = new float[verticesNew.size()];
+        for (int i = 0; i < verticesNew.size(); i++) {
+            verticesNewArray[i] = verticesNew.get(i);
+        }
+        byte[] facesNewArray = new byte[facesNew.size()];
+        for (int i = 0; i < facesNew.size(); i++) {
+            facesNewArray[i] = facesNew.get(i).byteValue();
+        }
+        _vb = RenderUtils.buildFloatBuffer(verticesNewArray);
+
+        _ib =  RenderUtils.buildByteBuffer(facesNewArray);
+
+    }
+
     private void fillInBuffersWithNormals() {
 
         int facesSize = faces.size();
@@ -327,6 +439,7 @@ public class Model {
         tempVn = new float[facesSize * 3 * 3];
         indices = new byte[facesSize * 3];
 
+        Log.d("DDDL", "face size: " + String.valueOf(faces.size()));
         for (int i = 0; i < facesSize; i++) {
             Face face = faces.get(i);
             tempV[i * 9] = face.getVertices().get(0).getX();
