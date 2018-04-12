@@ -109,9 +109,11 @@
 
     <FrameLayout
         android:id="@+id/mainLayout"
-        android:orientation="vertical"
         android:layout_width="400dp"
-        android:layout_height="300dp" />
+        android:layout_height="300dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" />
 
     <TextView
         android:text="TextView"
@@ -338,14 +340,14 @@
         android:visibility="invisible"/>
 
     <Button
-        android:text="imu on"
+        android:id="@+id/imuon"
         android:layout_width="60dp"
         android:layout_height="30dp"
         android:layout_alignBottom="@+id/button"
         android:layout_toEndOf="@+id/button"
-        android:id="@+id/imuon"
+        android:text="imu on"
         android:textSize="5sp"
-        android:visibility="invisible"/>
+        android:visibility="visible" />
 
     <Button
         android:text="reset"

@@ -17,6 +17,9 @@ import java.util.Map;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import static com.example.chongshao_mikasa.ble_fingerprint_java.Utils.cameraToStr;
+import static com.example.chongshao_mikasa.ble_fingerprint_java.Utils.getInitM;
+
 /**
  * Created by chongshao-mikasa on 11/13/16.
  */
@@ -65,38 +68,18 @@ public class SimpleRenderer extends ARRenderer  {
         beaconAngle.put("9aa9bca6-b207-41f5-a076-d294c9b374db", 225);
         beaconAngle.put("21f158a6-a083-4020-9b40-8cd34380ffc3", 270);
         beaconAngle.put("7691f1bd-284f-439d-8b1a-d223f0249b9b", 315);
-     //   m = new float[16];
-  //      m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
-  //              -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
-  //              0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
-   //             -50.001564f, -24.064268f, -271.0829f, 1.0f};
 
-        m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                -15.0f, -50.0f, -500.0f, 1.0f};
-//        m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
-//                -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
-//                0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
-//                -0.001564f, -0.064268f, -0.0829f, 1.0f};
+        m = getInitM();
+
         float[] rotateM = new float[9];
 
         // cameraM
         cameraM = new float[16];
         Matrix.invertM(cameraM, 0, m, 0);
         Matrix.invertM(m, 0, cameraM, 0);
-        Log.d("T", "cameraM: " + String.valueOf(cameraM[0]) + " " + String.valueOf(cameraM[1]) + " " +
-                String.valueOf(cameraM[2]) + " " + String.valueOf(cameraM[3]) + " " + String.valueOf(cameraM[4]) + " " +
-                String.valueOf(cameraM[5]) + " " + String.valueOf(cameraM[6]) + " " + String.valueOf(cameraM[7]) + " " +
-                String.valueOf(cameraM[8]) + " " + String.valueOf(cameraM[9]) + " " + String.valueOf(cameraM[10]) + " " +
-                String.valueOf(cameraM[11]) + " " + String.valueOf(cameraM[12]) + " " + String.valueOf(cameraM[13]) + " " +
-                String.valueOf(cameraM[14]) + " " + String.valueOf(cameraM[15]));
-        Log.d("T", "m: " + String.valueOf(m[0]) + " " + String.valueOf(m[1]) + " " +
-                String.valueOf(m[2]) + " " + String.valueOf(m[3]) + " " + String.valueOf(m[4]) + " " +
-                String.valueOf(m[5]) + " " + String.valueOf(m[6]) + " " + String.valueOf(m[7]) + " " +
-                String.valueOf(m[8]) + " " + String.valueOf(m[9]) + " " + String.valueOf(m[10]) + " " +
-                String.valueOf(m[11]) + " " + String.valueOf(m[12]) + " " + String.valueOf(m[13]) + " " +
-                String.valueOf(m[14]) + " " + String.valueOf(m[15]));
+
+        Log.d("T", "cameraM: " + cameraToStr(cameraM));
+        Log.d("T", "m: " + cameraToStr(m));
 
         rotateM[0] = cameraM[0];
         rotateM[1] = cameraM[1];
@@ -113,7 +96,6 @@ public class SimpleRenderer extends ARRenderer  {
         angle2 = radToDegree(angles[1]);
         angle3 = radToDegree(angles[2]);
         Log.d("T", "angles: " + String.valueOf(angle1) + " " + String.valueOf(angle2) + " " + String.valueOf(angle3));
-
     }
 
     public void setBitmap(Bitmap bitmap) {
@@ -121,20 +103,8 @@ public class SimpleRenderer extends ARRenderer  {
     }
 
     public void reset() {
-
-    //    m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
-    //            0.0f, 1.0f, 0.0f, 0.0f,
-    //            0.0f, 0.0f, 1.0f, 0.0f,
-    //            -15.0f, -50.0f, -500.0f, 1.0f};
         // reset m matrix
-        m = new float[]{1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                -15.0f, -50.0f, -2000.0f, 1.0f};
-     //   m = new float[]{-0.9930515f, 0.060360666f, 0.10102971f, 0.0f,
-     //           -0.06912676f, -0.993927f, -0.08563979f, 0.0f,
-     //           0.095246725f, -0.09202827f, 0.9911907f, 0.0f,
-     //           -104.001564f, -24.064268f, -271.0829f, 1.0f};
+        m = getInitM();
         Matrix.invertM(cameraM, 0, m, 0);
         Matrix.invertM(m, 0, cameraM, 0);
     }
@@ -389,7 +359,6 @@ public class SimpleRenderer extends ARRenderer  {
     //    }
 
     //    Matrix.rotateM(m, 0, m, 0, xangle, 0,0,1);
-        // TODO: 03/26: temporaly disable object moving
         reset();
 
         gl.glLoadMatrixf(m, 0);
