@@ -87,8 +87,6 @@ import static org.opencv.imgproc.Imgproc.resize;
 
 // TODO: 2. make the sphere with face image mapping
 // TODO: 3. make the hand with rods
-
-// TODO: find where camera is used for localization
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 public class MainActivity extends ARActivity implements SensorEventListener {

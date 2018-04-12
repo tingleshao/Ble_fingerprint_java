@@ -231,12 +231,7 @@ public class SimpleRenderer extends ARRenderer  {
 //            cameraM[9] = rotateM[7];
 //            cameraM[10] = rotateM[8];
 //        }
-      //  Log.d("T", "in update, cameraM: " + String.valueOf(cameraM[0]) + " " + String.valueOf(cameraM[1]) + " " +
-       //                 String.valueOf(cameraM[2]) + " " + String.valueOf(cameraM[3]) + " " + String.valueOf(cameraM[4]) + " " +
-       //                 String.valueOf(cameraM[5]) + " " + String.valueOf(cameraM[6]) + " " + String.valueOf(cameraM[7]) + " " +
-       //                 String.valueOf(cameraM[8]) + " " + String.valueOf(cameraM[9]) + " " + String.valueOf(cameraM[10]) + " " +
-       //                 String.valueOf(cameraM[11]) + " " + String.valueOf(cameraM[12]) + " " + String.valueOf(cameraM[13]) + " " +
-       //                 String.valueOf(cameraM[14]) + " " + String.valueOf(cameraM[15]));
+//        Log.d("T", "in update, cameraM: " + cameraToStr(cameraM));
         Matrix.invertM(m, 0, cameraM, 0);
     }
 
