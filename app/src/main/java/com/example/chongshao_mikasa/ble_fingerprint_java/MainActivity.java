@@ -1517,4 +1517,10 @@ public class MainActivity extends ARActivity implements SensorEventListener {
       //  return Integer.parseInt(this.spinner.getSelectedItem().toString());
         return 3;
     }
+//
+//    @Override
+//    public void onFrameProcessed() {
+//     //   this.simpleRenderer.draw(new GL);
+//    }
+
 }

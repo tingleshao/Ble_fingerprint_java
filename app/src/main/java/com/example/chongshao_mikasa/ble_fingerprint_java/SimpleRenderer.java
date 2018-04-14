@@ -28,10 +28,10 @@ public class SimpleRenderer extends ARRenderer  {
  //   private int markerID = -1;
 
 //    private People guy = new People(40.0f, 0.0f, 0.0f, 20.0f);
-  //  private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
+    private People2 guy = new People2(40.0f, 0.0f, 0.0f, -200.0f);
 
-    private People3 guy = new People3();
-
+ //   private People3 guy = new People3();
+//
     private float angle = 0.0f;
     private boolean spinning = false;
     private int drawCount = 0;
@@ -324,9 +324,11 @@ public class SimpleRenderer extends ARRenderer  {
         return (float)Math.cos(angleinradius);
     }
 
+    @Override
     public void draw(GL10 gl) {
+        Log.d("DDL", "drawing");
        if (!setModeled) {
-          guy.setModel(R.raw.tinker, activity);
+       //   guy.setModel(R.raw.tinker, activity);
            setModeled = true;
        }
         //  this.drawCount += 1;

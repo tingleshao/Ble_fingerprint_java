@@ -2,6 +2,7 @@ package org.artoolkit.ar.base.rendering;
 
 
 import android.graphics.Bitmap;
+import android.opengl.GLES10;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

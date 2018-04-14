@@ -44,6 +44,7 @@ import org.artoolkit.ar.base.ARToolKit;
 
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 /**
  * Base renderer which should be subclassed in the main application and provided 
@@ -67,28 +68,39 @@ public class ARRenderer implements GLSurfaceView.Renderer {
 	public boolean configureARScene() {
 		return true;
 	}
-	
-    public void onSurfaceCreated(GL10 unused, EGLConfig config) {        
+
+	@Override
+    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        Log.d("DDL", "on surface created is called");
     	
     	// Transparent background
     	GLES10.glClearColor(0.0f, 0.0f, 0.0f, 0.f);
     }
 
+    @Override
     public void onSurfaceChanged(GL10 unused, int w, int h) {
-    	GLES10.glViewport(0, 0, w, h);
+        Log.d("DDL", "on surface changed is called");
+
+        GLES10.glViewport(0, 0, w, h);
     }
 
+    @Override
     public void onDrawFrame(GL10 gl) {
+	    Log.d("DDL", "on draw frame is called");
     	if (ARToolKit.getInstance().isRunning()) {    		
     		draw(gl);
-    	}    	
+    	}    	else {
+            Log.d("DDL", "artoolkit instance is not running");
+
+        }
     }
     
     /**
      * Should be overridden in subclasses and used to perform rendering.
      */
     public void draw(GL10 gl) {
-    	GLES10.glClear(GLES10.GL_COLOR_BUFFER_BIT | GLES10.GL_DEPTH_BUFFER_BIT);
+        Log.d("DDL", " draw is called");
+        GLES10.glClear(GLES10.GL_COLOR_BUFFER_BIT | GLES10.GL_DEPTH_BUFFER_BIT);
     }
     
 }
